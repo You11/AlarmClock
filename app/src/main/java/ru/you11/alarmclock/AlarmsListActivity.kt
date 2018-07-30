@@ -1,11 +1,13 @@
 package ru.you11.alarmclock
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 
@@ -13,13 +15,21 @@ class AlarmsListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_alarms_list)
 
+        setupAddButton()
         setupRecyclerView()
     }
 
-    private fun setupRecyclerView() {
+    private fun setupAddButton() {
+        val addAlarmButton = findViewById<Button>(R.id.all_alarms_add_button).apply {
+            setOnClickListener {
+                it.context?.startActivity(Intent(it.context, AlarmSetupActivity::class.java))
+            }
+        }
+    }
 
+    private fun setupRecyclerView() {
         //testData
         val alarmNames = createFakeDataForAlarm()
 
@@ -59,11 +69,12 @@ class AlarmsRWAdapter(private val alarmNames: ArrayList<String>): RecyclerView.A
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.alarmName.text = alarmNames[position]
+        holder.alarmName.setOnClickListener {
+            it.context?.startActivity(Intent(it.context, AlarmSetupActivity::class.java))
+        }
     }
 
     override fun getItemCount(): Int {
         return alarmNames.size
     }
-
-
 }
