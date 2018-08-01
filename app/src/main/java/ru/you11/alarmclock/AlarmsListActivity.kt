@@ -1,5 +1,6 @@
 package ru.you11.alarmclock
 
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -10,12 +11,22 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 
 class AlarmsListActivity : AppCompatActivity() {
+
+    private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
+    private lateinit var viewModel: AlarmViewModel
+    private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarms_list)
+
+        viewModelFactory = Injection.provideViewModelFactory(this)
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
 
         setupAddButton()
         setupRecyclerView()
@@ -31,21 +42,35 @@ class AlarmsListActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         //testData
-        val alarmNames = createFakeDataForAlarm()
+
+        val alarmNames = ArrayList<String>()
 
         val rvManager = LinearLayoutManager(this)
         val rvAdapter = AlarmsRWAdapter(alarmNames)
+
+        createFakeDataForAlarm(alarmNames, rvAdapter)
+
         val recyclerView = findViewById<RecyclerView>(R.id.all_alarms_recycler_view).apply {
             layoutManager = rvManager
             adapter = rvAdapter
         }
+
+
     }
 
-    private fun createFakeDataForAlarm(): ArrayList<String> {
-        val alarmNames = ArrayList<String>()
-        alarmNames.add("alarm")
-        alarmNames.add("alarm2")
-        alarmNames.add("alarm3")
+    private fun createFakeDataForAlarm(alarmNames: ArrayList<String>, rvAdapter: AlarmsRWAdapter): ArrayList<String> {
+        val alarms = ArrayList<Alarm>()
+
+        disposable.add(viewModel.getAlarmList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    alarms.addAll(it)
+                    for (el in alarms) {
+                        alarmNames.add(el.name)
+                    }
+                    rvAdapter.notifyDataSetChanged()
+                })
 
         return alarmNames
     }

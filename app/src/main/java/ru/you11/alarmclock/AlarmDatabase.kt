@@ -24,9 +24,5 @@ abstract class AlarmDatabase: RoomDatabase() {
 
             return INSTANCE!!
         }
-
-        fun destroyInstance() {
-            INSTANCE = null
-        }
     }
 }
