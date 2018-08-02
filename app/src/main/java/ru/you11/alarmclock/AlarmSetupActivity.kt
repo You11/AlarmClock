@@ -103,7 +103,7 @@ class AlarmSetupActivity: AppCompatActivity() {
                                 alarmTime.isEnabled = true
 
                                 setAlarm(alarm)
-                            }, { error -> Log.e("meow", "Unable to update username", error) }))
+                            }, { error -> Log.e("Error", "Unable to update username", error) }))
                 })
     }
 
@@ -114,6 +114,7 @@ class AlarmSetupActivity: AppCompatActivity() {
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
         calendar.set(Calendar.MINUTE, alarm.minutes)
-        alarmManager.set(AlarmManager.RTC_WAKEUP,1000 * 1000, alarmIntent)
+        calendar.set(Calendar.SECOND, 0)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
     }
 }

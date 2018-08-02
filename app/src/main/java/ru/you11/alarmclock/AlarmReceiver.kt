@@ -10,6 +10,6 @@ class AlarmReceiver: BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         Toast.makeText(context, "meow", Toast.LENGTH_SHORT).show()
-        Log.d("alarm", "alarm started")
+        Log.d("alarmTesting", "alarm started")
     }
 }
