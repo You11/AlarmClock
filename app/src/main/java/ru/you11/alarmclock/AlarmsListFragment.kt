@@ -2,34 +2,34 @@ package ru.you11.alarmclock
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-class AlarmsListActivity : AppCompatActivity() {
+class AlarmsListFragment: Fragment() {
 
-    private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
-    private lateinit var viewModel: AlarmViewModel
-    private val disposable = CompositeDisposable()
+    private lateinit var activity: MainActivity
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_alarms_list)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        activity = this.getActivity() as MainActivity
 
-        viewModelFactory = Injection.provideViewModelFactory(this)
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
+        return inflater.inflate(R.layout.fragment_alarms_list, container, false)
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         setupAddButton()
         setupStopButton()
@@ -37,17 +37,17 @@ class AlarmsListActivity : AppCompatActivity() {
     }
 
     private fun setupAddButton() {
-        val addAlarmButton = findViewById<Button>(R.id.all_alarms_add_button).apply {
+        val addAlarmButton = view?.findViewById<Button>(R.id.all_alarms_add_button)?.apply {
             setOnClickListener {
-                it.context?.startActivity(Intent(it.context, AlarmSetupActivity::class.java))
+                startFragment(activity)
             }
         }
     }
 
     private fun setupStopButton() {
-        val stopButton = findViewById<Button>(R.id.all_alarms_stop_button).apply {
+        val stopButton = view?.findViewById<Button>(R.id.all_alarms_stop_button)?.apply {
             setOnClickListener {
-                val alarmManager = getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+                val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
                 val alarmIntent = PendingIntent.getBroadcast(context, 120, Intent(context, AlarmReceiver::class.java), 0)
                 alarmManager.cancel(alarmIntent)
                 Log.d("alarm", "alarm stopped")
@@ -60,12 +60,12 @@ class AlarmsListActivity : AppCompatActivity() {
 
         val alarmNames = ArrayList<Alarm>()
 
-        val rvManager = LinearLayoutManager(this)
+        val rvManager = LinearLayoutManager(activity)
         val rvAdapter = AlarmsRWAdapter(alarmNames)
 
         createFakeDataForAlarm(alarmNames, rvAdapter)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.all_alarms_recycler_view).apply {
+        val recyclerView = view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.apply {
             layoutManager = rvManager
             adapter = rvAdapter
         }
@@ -75,7 +75,7 @@ class AlarmsListActivity : AppCompatActivity() {
 
     private fun createFakeDataForAlarm(alarms: ArrayList<Alarm>, rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
 
-        disposable.add(viewModel.getAlarmList()
+        activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -108,11 +108,19 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
         holder.name.text = alarms[position].name
         holder.time.text = alarms[position].hours.toString() + "hours," + alarms[position].minutes.toString() + "minutes"
         holder.name.setOnClickListener {
-            it.context?.startActivity(Intent(it.context, AlarmSetupActivity::class.java))
+            val activity = it.context as MainActivity
+            startFragment(activity)
         }
     }
 
     override fun getItemCount(): Int {
         return alarms.size
     }
+}
+
+private fun startFragment(activity: AppCompatActivity) {
+    activity.supportFragmentManager.beginTransaction()
+            .replace(R.id.empty_fragment_container, AlarmSetupFragment())
+            .addToBackStack("AlarmsListFragment")
+            .commit()
 }
