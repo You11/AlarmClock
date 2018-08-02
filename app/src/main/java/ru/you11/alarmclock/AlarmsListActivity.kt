@@ -1,11 +1,14 @@
 package ru.you11.alarmclock
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
@@ -29,6 +32,7 @@ class AlarmsListActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
 
         setupAddButton()
+        setupStopButton()
         setupRecyclerView()
     }
 
@@ -36,6 +40,17 @@ class AlarmsListActivity : AppCompatActivity() {
         val addAlarmButton = findViewById<Button>(R.id.all_alarms_add_button).apply {
             setOnClickListener {
                 it.context?.startActivity(Intent(it.context, AlarmSetupActivity::class.java))
+            }
+        }
+    }
+
+    private fun setupStopButton() {
+        val stopButton = findViewById<Button>(R.id.all_alarms_stop_button).apply {
+            setOnClickListener {
+                val alarmManager = getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+                val alarmIntent = PendingIntent.getBroadcast(context, 120, Intent(context, AlarmReceiver::class.java), 0)
+                alarmManager.cancel(alarmIntent)
+                Log.d("alarm", "alarm stopped")
             }
         }
     }

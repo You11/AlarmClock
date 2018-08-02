@@ -1,9 +1,13 @@
 package ru.you11.alarmclock
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.AlarmManagerCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
@@ -13,6 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.alarm_recycler_view_card.*
+import java.util.*
 
 class AlarmSetupActivity: AppCompatActivity() {
 
@@ -96,8 +101,19 @@ class AlarmSetupActivity: AppCompatActivity() {
                             .subscribe({
                                 saveButton.isEnabled = true
                                 alarmTime.isEnabled = true
-                            },
-                                    { error -> Log.e("meow", "Unable to update username", error) }))
+
+                                setAlarm(alarm)
+                            }, { error -> Log.e("meow", "Unable to update username", error) }))
                 })
+    }
+
+    private fun setAlarm(alarm: Alarm) {
+        val alarmManager = getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = PendingIntent.getBroadcast(this, 120, Intent(this, AlarmReceiver::class.java), 0)
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
+        calendar.set(Calendar.MINUTE, alarm.minutes)
+        alarmManager.set(AlarmManager.RTC_WAKEUP,1000 * 1000, alarmIntent)
     }
 }
