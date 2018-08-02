@@ -9,4 +9,10 @@
         android:layout_height="wrap_content"
         android:id="@+id/alarm_name_text_view"
         android:padding="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/alarm_time_text_view"
+        android:padding="20dp"/>
 </LinearLayout>

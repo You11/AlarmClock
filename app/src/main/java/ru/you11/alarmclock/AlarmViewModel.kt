@@ -10,10 +10,15 @@ class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
         return dataSource.getAll()
     }
 
-    fun updateAlarm(alarmId: Int, alarmName: String): Completable {
+    fun updateAlarm(alarm: Alarm): Completable {
         return Completable.fromAction {
-            val alarm = Alarm(alarmId, alarmName)
             dataSource.insert(alarm)
+        }
+    }
+
+    fun deleteAllAlarms(): Completable {
+        return Completable.fromAction {
+            dataSource.deleteAll()
         }
     }
 }

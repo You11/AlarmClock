@@ -2,11 +2,13 @@ package ru.you11.alarmclock
 
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
+import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TimePicker
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -58,6 +60,9 @@ class AlarmSetupActivity: AppCompatActivity() {
             isEnabled = false
 
         }
+        val alarmTime = findViewById<TimePicker>(R.id.alarm_time_setup).apply {
+            isEnabled = false
+        }
         val saveButton = findViewById<Button>(R.id.alarm_setup_save_button)
 
         var alarmCount: Int
@@ -70,12 +75,29 @@ class AlarmSetupActivity: AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     alarmCount = it.count()
-                    disposable.add(viewModel.updateAlarm(alarmCount, alarmName.text.toString())
+
+                    val selectedHour: Int
+                    val selectedMinute: Int
+
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        selectedHour = alarmTime.hour
+                        selectedMinute = alarmTime.minute
+                    }
+                    else {
+                        selectedHour = alarmTime.currentHour
+                        selectedMinute = alarmTime.currentMinute
+                    }
+
+                    val alarm = Alarm(alarmCount, alarmName.text.toString(), selectedHour, selectedMinute)
+
+                    disposable.add(viewModel.updateAlarm(alarm)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({ saveButton.isEnabled = true },
+                            .subscribe({
+                                saveButton.isEnabled = true
+                                alarmTime.isEnabled = true
+                            },
                                     { error -> Log.e("meow", "Unable to update username", error) }))
                 })
     }
-
 }

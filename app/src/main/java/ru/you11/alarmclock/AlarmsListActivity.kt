@@ -43,7 +43,7 @@ class AlarmsListActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         //testData
 
-        val alarmNames = ArrayList<String>()
+        val alarmNames = ArrayList<Alarm>()
 
         val rvManager = LinearLayoutManager(this)
         val rvAdapter = AlarmsRWAdapter(alarmNames)
@@ -58,30 +58,27 @@ class AlarmsListActivity : AppCompatActivity() {
 
     }
 
-    private fun createFakeDataForAlarm(alarmNames: ArrayList<String>, rvAdapter: AlarmsRWAdapter): ArrayList<String> {
-        val alarms = ArrayList<Alarm>()
+    private fun createFakeDataForAlarm(alarms: ArrayList<Alarm>, rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
 
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     alarms.addAll(it)
-                    for (el in alarms) {
-                        alarmNames.add(el.name)
-                    }
                     rvAdapter.notifyDataSetChanged()
                 })
 
-        return alarmNames
+        return alarms
     }
 }
 
 
-class AlarmsRWAdapter(private val alarmNames: ArrayList<String>): RecyclerView.Adapter<AlarmsRWAdapter.ViewHolder> () {
+class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapter<AlarmsRWAdapter.ViewHolder> () {
 
 
     class ViewHolder(val layout: LinearLayout) : RecyclerView.ViewHolder(layout) {
-        val alarmName: TextView = layout.findViewById(R.id.alarm_name_text_view)
+        val name: TextView = layout.findViewById(R.id.alarm_name_text_view)
+        val time: TextView = layout.findViewById(R.id.alarm_time_text_view)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlarmsRWAdapter.ViewHolder {
@@ -93,13 +90,14 @@ class AlarmsRWAdapter(private val alarmNames: ArrayList<String>): RecyclerView.A
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.alarmName.text = alarmNames[position]
-        holder.alarmName.setOnClickListener {
+        holder.name.text = alarms[position].name
+        holder.time.text = alarms[position].hours.toString() + "hours," + alarms[position].minutes.toString() + "minutes"
+        holder.name.setOnClickListener {
             it.context?.startActivity(Intent(it.context, AlarmSetupActivity::class.java))
         }
     }
 
     override fun getItemCount(): Int {
-        return alarmNames.size
+        return alarms.size
     }
 }

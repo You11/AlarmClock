@@ -7,6 +7,7 @@ import java.util.*
 
 @Entity(tableName = "alarmData")
 data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int? = null,
-                 @ColumnInfo(name = "name") var name: String = ""
-//                 @ColumnInfo(name = "time") val time: Date = Date())
+                 @ColumnInfo(name = "name") var name: String = "",
+                 @ColumnInfo(name = "hours") var hours: Int = -1,
+                 @ColumnInfo(name = "minutes") var minutes: Int = -1
 )
