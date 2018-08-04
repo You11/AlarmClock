@@ -85,6 +85,8 @@ class AlarmSetupFragment: Fragment() {
                                 alarmTime.isEnabled = true
 
                                 setAlarm(alarm)
+
+                                fragmentManager?.popBackStack()
                             }, { error -> Log.e("Error", "Unable to update username", error) }))
                 })
     }
