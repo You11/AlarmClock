@@ -21,6 +21,7 @@ import io.reactivex.schedulers.Schedulers
 class AlarmsListFragment: Fragment() {
 
     private lateinit var activity: MainActivity
+    private val alarms = ArrayList<Alarm>()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity = this.getActivity() as MainActivity
@@ -33,6 +34,7 @@ class AlarmsListFragment: Fragment() {
 
         setupAddButton()
         setupStopButton()
+        setupDeleteButton()
         setupRecyclerView()
     }
 
@@ -55,15 +57,26 @@ class AlarmsListFragment: Fragment() {
         }
     }
 
+    private fun setupDeleteButton() {
+        val deleteButton = view?.findViewById<Button>(R.id.all_alarms_delete_button)?.apply {
+            setOnClickListener {
+                activity.disposable.add(activity.viewModel.deleteAllAlarms()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            alarms.clear()
+                            view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.adapter?.notifyDataSetChanged()
+                        })
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         //testData
-
-        val alarmNames = ArrayList<Alarm>()
-
         val rvManager = LinearLayoutManager(activity)
-        val rvAdapter = AlarmsRWAdapter(alarmNames)
+        val rvAdapter = AlarmsRWAdapter(alarms)
 
-        createFakeDataForAlarm(alarmNames, rvAdapter)
+        createFakeDataForAlarm(rvAdapter)
 
         val recyclerView = view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.apply {
             layoutManager = rvManager
@@ -73,7 +86,7 @@ class AlarmsListFragment: Fragment() {
 
     }
 
-    private fun createFakeDataForAlarm(alarms: ArrayList<Alarm>, rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
+    private fun createFakeDataForAlarm(rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
 
         activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
@@ -106,7 +119,7 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.name.text = alarms[position].name
-        holder.time.text = alarms[position].hours.toString() + "hours," + alarms[position].minutes.toString() + "minutes"
+        holder.time.text = alarms[position].hours.toString() + ":" + alarms[position].minutes.toString()
         holder.name.setOnClickListener {
             val activity = it.context as MainActivity
             startFragment(activity)

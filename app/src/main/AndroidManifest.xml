@@ -20,6 +20,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".AlarmStartActivity"
+            android:theme="@style/Theme.Transparent"/>
+
         <receiver android:name=".AlarmReceiver" />
     </application>
 
