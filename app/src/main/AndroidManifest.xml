@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AlarmStartActivity"
+        <activity android:name=".ActivatedAlarmActivity"
             android:theme="@style/Theme.Transparent"/>
 
         <receiver android:name=".AlarmReceiver" />
