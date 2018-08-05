@@ -10,25 +10,29 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        style="?android:attr/buttonBarStyle">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/add_alarm_button"
-            android:id="@+id/all_alarms_add_button"/>
+            android:id="@+id/all_alarms_add_button"
+            style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cancel all alarms"
-            android:id="@+id/all_alarms_stop_button"/>
+            android:text="@string/cancel_all_alarms_button"
+            android:id="@+id/all_alarms_stop_button"
+            style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete all alarms"
-            android:id="@+id/all_alarms_delete_button"/>
+            android:text="@string/delete_all_alarms_button"
+            android:id="@+id/all_alarms_delete_button"
+            style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView

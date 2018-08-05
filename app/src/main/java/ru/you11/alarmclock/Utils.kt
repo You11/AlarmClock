@@ -17,7 +17,9 @@ class Utils {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    alarm.aid = it.count()
+                    if (alarm.aid == null) {
+                        alarm.aid = it.count()
+                    }
                     disposable.add(viewModel.updateAlarm(alarm)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())

@@ -42,7 +42,7 @@ class AlarmsListFragment: Fragment() {
     private fun setupAddButton() {
         view?.findViewById<Button>(R.id.all_alarms_add_button)?.apply {
             setOnClickListener {
-                startFragment(activity)
+                startFragment(activity, null)
             }
         }
     }
@@ -134,7 +134,15 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
         holder.time.text = getAlarmTime(alarm.hours, alarm.minutes)
         holder.layout.setOnClickListener {
             val activity = it.context as MainActivity
-            startFragment(activity)
+
+            //TODO: this is horrible, put in parcelable
+            val arguments = Bundle()
+            arguments.putInt("alarmId", alarm.aid!!)
+            arguments.putString("alarmName", alarm.name)
+            arguments.putInt("alarmHour", alarm.hours)
+            arguments.putInt("alarmMinute", alarm.minutes)
+
+            startFragment(activity, arguments)
         }
     }
 
@@ -151,9 +159,13 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
     }
 }
 
-private fun startFragment(activity: AppCompatActivity) {
+private fun startFragment(activity: AppCompatActivity, arguments: Bundle?) {
+    val fragment = AlarmSetupFragment()
+
+    if (arguments != null) fragment.arguments = arguments
+
     activity.supportFragmentManager.beginTransaction()
-            .replace(R.id.empty_fragment_container, AlarmSetupFragment())
+            .replace(R.id.empty_fragment_container, fragment)
             .addToBackStack("AlarmsListFragment")
             .commit()
 }

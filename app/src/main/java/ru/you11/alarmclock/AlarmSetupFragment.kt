@@ -2,24 +2,18 @@ package ru.you11.alarmclock
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TimePicker
-import android.widget.Toast
+import android.widget.*
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 
 class AlarmSetupFragment: Fragment() {
 
@@ -33,6 +27,26 @@ class AlarmSetupFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
+
+        //TODO: check better
+        if (arguments != null) {
+            view?.findViewById<TextView>(R.id.alarm_name_setup)?.apply {
+                text = this@AlarmSetupFragment.arguments?.getString("alarmName")
+            }
+
+            view?.findViewById<TimePicker>(R.id.alarm_time_setup)?.apply {
+                val alarmHour = this@AlarmSetupFragment.arguments?.getInt("alarmHour")!!
+                val alarmMinute = this@AlarmSetupFragment.arguments?.getInt("alarmMinute")!!
+
+                if (Build.VERSION.SDK_INT >= 23) {
+                    hour = alarmHour
+                    minute = alarmMinute
+                } else {
+                    currentHour = alarmHour
+                    currentMinute = alarmMinute
+                }
+            }
+        }
 
         //save alarm
         view?.findViewById<Button>(R.id.alarm_setup_save_button)?.apply {
@@ -69,7 +83,10 @@ class AlarmSetupFragment: Fragment() {
             return
         }
 
-        val alarm = Alarm(name = alarmName?.text?.toString()!!,
+        val id: Int? = getAlarmId()
+
+        val alarm = Alarm(aid = id,
+                name = alarmName?.text?.toString()!!,
                 hours = selectedHour,
                 minutes = selectedMinute)
         //TODO: dispose onStop?
@@ -84,5 +101,24 @@ class AlarmSetupFragment: Fragment() {
                     saveButton?.isEnabled = true
                     alarmTime.isEnabled = true
                 })
+    }
+
+    private fun getAlarmId(): Int? {
+        val id: Int?
+
+        if (arguments != null) {
+            id = arguments?.getInt("alarmId")
+            cancelExistingAlarm(id)
+        } else {
+            id = null
+        }
+
+        return id
+    }
+
+    private fun cancelExistingAlarm(id: Int?) {
+        val alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = PendingIntent.getBroadcast(context, id!!, Intent(context, AlarmReceiver::class.java), 0)
+        alarmManager.cancel(alarmIntent)
     }
 }

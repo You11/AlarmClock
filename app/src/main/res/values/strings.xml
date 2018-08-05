@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">AlarmClock</string>
-    <string name="add_alarm_button">Add Alarm</string>
+    <string name="add_alarm_button">Add</string>
+    <string name="cancel_all_alarms_button">Cancel all</string>
+    <string name="delete_all_alarms_button">Delete all</string>
 </resources>
