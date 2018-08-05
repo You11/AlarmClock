@@ -13,7 +13,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TimePicker
+import android.widget.Toast
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.*
 
@@ -49,58 +53,38 @@ class AlarmSetupFragment: Fragment() {
 
         val saveButton = view?.findViewById<Button>(R.id.alarm_setup_save_button)
 
-        //how many alarms are set already
-        var alarmCount: Int
+        val selectedHour: Int
+        val selectedMinute: Int
 
-        val thread = Schedulers.single()
+        if (alarmTime != null) {
+            if (Build.VERSION.SDK_INT >= 23) {
+                selectedHour = alarmTime.hour
+                selectedMinute = alarmTime.minute
+            }
+            else {
+                selectedHour = alarmTime.currentHour
+                selectedMinute = alarmTime.currentMinute
+            }
+        } else {
+            return
+        }
 
-        //get all alarms
-        activity.disposable.add(activity.viewModel.getAlarmList()
-                .subscribeOn(thread)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    alarmCount = it.count()
-
-                    val selectedHour: Int
-                    val selectedMinute: Int
-
-                    if (alarmTime != null) {
-                        if (Build.VERSION.SDK_INT >= 23) {
-                            selectedHour = alarmTime.hour
-                            selectedMinute = alarmTime.minute
-                        }
-                        else {
-                            selectedHour = alarmTime.currentHour
-                            selectedMinute = alarmTime.currentMinute
-                        }
-                    } else {
-                        return@subscribe
-                    }
-
-                    val alarm = Alarm(alarmCount, alarmName?.text.toString(), selectedHour, selectedMinute)
-
-                    activity.disposable.add(activity.viewModel.updateAlarm(alarm)
-                            .subscribeOn(thread)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-                                saveButton?.isEnabled = true
-                                alarmTime.isEnabled = true
-
-                                setAlarm(alarm, alarmCount)
-
-                                fragmentManager?.popBackStack()
-                            }, { error -> Log.e("Error", "Unable to update username", error) }))
+        val alarm = Alarm(name = alarmName?.text?.toString()!!,
+                hours = selectedHour,
+                minutes = selectedMinute)
+        //TODO: dispose onStop?
+        Flowable.just(Utils().setupAlarm(alarm,
+                activity.disposable,
+                activity.viewModel,
+                activity))
+                .observeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe( {
+                    fragmentManager?.popBackStack()
+                }, {
+                    Toast.makeText(activity, "Error: " + it.localizedMessage, Toast.LENGTH_SHORT).show()
+                    saveButton?.isEnabled = true
+                    alarmTime.isEnabled = true
                 })
-    }
-
-    private fun setAlarm(alarm: Alarm, alarmCount: Int) {
-        val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = PendingIntent.getBroadcast(activity, alarmCount + 200, Intent(activity, AlarmReceiver::class.java), 0)
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-        calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
-        calendar.set(Calendar.MINUTE, alarm.minutes)
-        calendar.set(Calendar.SECOND, 0)
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
     }
 }

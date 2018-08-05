@@ -13,7 +13,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/activated_alarm_dismiss_button"
-        android:text="Dismiss"/>
+        android:id="@+id/activated_alarm_turn_off_button"
+        android:text="Turn off"/>
 
 </LinearLayout>

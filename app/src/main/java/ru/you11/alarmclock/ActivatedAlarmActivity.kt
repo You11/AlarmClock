@@ -1,5 +1,6 @@
 package ru.you11.alarmclock
 
+import android.arch.lifecycle.ViewModelProviders
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -8,18 +9,29 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.Toast
+import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 class ActivatedAlarmActivity: AppCompatActivity() {
 
-    val mediaPlayer = MediaPlayer()
+    private val disposable = CompositeDisposable()
+    private lateinit var viewModel: AlarmViewModel
+    private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
+    private val mediaPlayer = MediaPlayer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_activated_alarm)
 
+        viewModelFactory = Injection.provideViewModelFactory(this)
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
+
         setupMediaPlayer()
         setupDelayButton()
-        setupDismissButton()
+        setupTurnOffButton()
     }
 
     private fun setupMediaPlayer() {
@@ -42,11 +54,27 @@ class ActivatedAlarmActivity: AppCompatActivity() {
     }
 
     private fun setupDelayButton() {
-
+        findViewById<Button>(R.id.activated_alarm_delay_button).apply {
+            setOnClickListener { _ ->
+                //sets alarm on one minute later
+                val currentTime = Calendar.getInstance()
+                currentTime.add(Calendar.MINUTE, 1)
+                //TODO: MEOW
+                val alarm = Alarm(name = "meow",
+                        hours = currentTime.get(Calendar.HOUR_OF_DAY),
+                        minutes = currentTime.get(Calendar.MINUTE))
+                Flowable.just(Utils().setupAlarm(alarm, disposable, viewModel, this@ActivatedAlarmActivity))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            finish()
+                        }
+            }
+        }
     }
 
-    private fun setupDismissButton() {
-        findViewById<Button>(R.id.activated_alarm_dismiss_button).apply {
+    private fun setupTurnOffButton() {
+        findViewById<Button>(R.id.activated_alarm_turn_off_button).apply {
             setOnClickListener {
                 mediaPlayer.stop()
                 finish()
@@ -57,5 +85,6 @@ class ActivatedAlarmActivity: AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         mediaPlayer.stop()
+        disposable.clear()
     }
 }
