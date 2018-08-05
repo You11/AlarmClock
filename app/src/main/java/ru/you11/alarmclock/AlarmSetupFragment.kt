@@ -30,29 +30,31 @@ class AlarmSetupFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
+        //save alarm
         view?.findViewById<Button>(R.id.alarm_setup_save_button)?.apply {
             setOnClickListener {
-                updateAlarms()
+                saveAlarm()
             }
         }
     }
 
-    private fun updateAlarms() {
+    private fun saveAlarm() {
 
         val alarmName = view?.findViewById<EditText>(R.id.alarm_name_setup)?.apply {
             isEnabled = false
-
         }
         val alarmTime = view?.findViewById<TimePicker>(R.id.alarm_time_setup)?.apply {
             isEnabled = false
         }
+
         val saveButton = view?.findViewById<Button>(R.id.alarm_setup_save_button)
 
+        //how many alarms are set already
         var alarmCount: Int
 
         val thread = Schedulers.single()
 
-        //TODO: how the hell do i thread
+        //get all alarms
         activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(thread)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -78,22 +80,22 @@ class AlarmSetupFragment: Fragment() {
                     val alarm = Alarm(alarmCount, alarmName?.text.toString(), selectedHour, selectedMinute)
 
                     activity.disposable.add(activity.viewModel.updateAlarm(alarm)
-                            .subscribeOn(Schedulers.io())
+                            .subscribeOn(thread)
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
                                 saveButton?.isEnabled = true
                                 alarmTime.isEnabled = true
 
-                                setAlarm(alarm)
+                                setAlarm(alarm, alarmCount)
 
                                 fragmentManager?.popBackStack()
                             }, { error -> Log.e("Error", "Unable to update username", error) }))
                 })
     }
 
-    private fun setAlarm(alarm: Alarm) {
+    private fun setAlarm(alarm: Alarm, alarmCount: Int) {
         val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = PendingIntent.getBroadcast(activity, 120, Intent(activity, AlarmReceiver::class.java), 0)
+        val alarmIntent = PendingIntent.getBroadcast(activity, alarmCount + 200, Intent(activity, AlarmReceiver::class.java), 0)
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
