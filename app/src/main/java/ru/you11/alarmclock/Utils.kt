@@ -12,34 +12,35 @@ import java.util.*
 
 class Utils {
 
-    fun setupAlarm(alarm: Alarm, disposable: CompositeDisposable, viewModel: AlarmViewModel, activity: AppCompatActivity) {
-        val thread = Schedulers.single()
-
-        //get all alarms
+    fun createAlarmInDatabase(alarm: Alarm, disposable: CompositeDisposable, viewModel: AlarmViewModel) {
         disposable.add(viewModel.getAlarmList()
-                .subscribeOn(thread)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    val alarmCount = it.count()
-
+                    alarm.aid = it.count()
                     disposable.add(viewModel.updateAlarm(alarm)
-                            .subscribeOn(thread)
+                            .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe({
-
-                                setupAlarm(alarm, alarmCount, activity)
-                            }, { error -> Log.e("Error", "Unable to update alarm", error) }))
+                            .subscribe())
                 })
     }
 
-    private fun setupAlarm(alarm: Alarm, alarmCount: Int, activity: AppCompatActivity) {
+    fun setupAlarm(alarm: Alarm, activity: AppCompatActivity) {
+
+        val alarmIntent = setupAlarmIntent(alarm, activity)
+
         val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = PendingIntent.getBroadcast(activity, alarmCount + 200, Intent(activity, AlarmReceiver::class.java), 0)
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
         calendar.set(Calendar.MINUTE, alarm.minutes)
         calendar.set(Calendar.SECOND, 0)
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+    }
+
+    private fun setupAlarmIntent(alarm: Alarm, activity: AppCompatActivity): PendingIntent {
+        val intent = Intent(activity, AlarmReceiver::class.java)
+        intent.putExtra("alarmId", alarm.aid)
+        return PendingIntent.getBroadcast(activity, alarm.aid!!, intent, 0)
     }
 }

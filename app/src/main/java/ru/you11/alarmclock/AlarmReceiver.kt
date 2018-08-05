@@ -9,7 +9,11 @@ class AlarmReceiver: BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
 
-        context?.startActivity(Intent(context, ActivatedAlarmActivity::class.java))
+        //passing alarm id to new activity
+        val newIntent = Intent(context, ActivatedAlarmActivity::class.java)
+        newIntent.putExtra("alarmId", intent?.extras?.getInt("alarmId"))
+        context?.startActivity(newIntent)
+
         Log.d("alarmTesting", "alarm started")
     }
 }

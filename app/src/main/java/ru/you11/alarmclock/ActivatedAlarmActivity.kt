@@ -7,6 +7,7 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import io.reactivex.Flowable
@@ -56,21 +57,31 @@ class ActivatedAlarmActivity: AppCompatActivity() {
     private fun setupDelayButton() {
         findViewById<Button>(R.id.activated_alarm_delay_button).apply {
             setOnClickListener { _ ->
-                //sets alarm on one minute later
-                val currentTime = Calendar.getInstance()
-                currentTime.add(Calendar.MINUTE, 1)
-                //TODO: MEOW
-                val alarm = Alarm(name = "meow",
-                        hours = currentTime.get(Calendar.HOUR_OF_DAY),
-                        minutes = currentTime.get(Calendar.MINUTE))
-                Flowable.just(Utils().setupAlarm(alarm, disposable, viewModel, this@ActivatedAlarmActivity))
-                        .subscribeOn(Schedulers.io())
+
+                this.isEnabled = false
+
+                val alarmId = intent.extras.getInt("alarmId")
+
+                disposable.add(viewModel.getAlarm(alarmId)
+                        .subscribeOn(Schedulers.single())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
+                        .subscribe { alarm ->
+
+                            //sets alarm on one minute later
+                            updateAlarmTime(alarm)
+                            Utils().setupAlarm(alarm, this@ActivatedAlarmActivity)
                             finish()
-                        }
+                        })
             }
         }
+    }
+
+    private fun updateAlarmTime(alarm: Alarm) {
+        val currentTime = Calendar.getInstance()
+        currentTime.add(Calendar.MINUTE, 1)
+
+        alarm.hours = currentTime.get(Calendar.HOUR_OF_DAY)
+        alarm.minutes = currentTime.get(Calendar.MINUTE)
     }
 
     private fun setupTurnOffButton() {

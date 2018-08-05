@@ -73,13 +73,11 @@ class AlarmSetupFragment: Fragment() {
                 hours = selectedHour,
                 minutes = selectedMinute)
         //TODO: dispose onStop?
-        Flowable.just(Utils().setupAlarm(alarm,
-                activity.disposable,
-                activity.viewModel,
-                activity))
+        Flowable.just(Utils().createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe( {
+                    Utils().setupAlarm(alarm, activity)
                     fragmentManager?.popBackStack()
                 }, {
                     Toast.makeText(activity, "Error: " + it.localizedMessage, Toast.LENGTH_SHORT).show()
