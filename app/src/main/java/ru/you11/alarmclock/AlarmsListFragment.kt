@@ -76,7 +76,7 @@ class AlarmsListFragment: Fragment() {
         val rvManager = LinearLayoutManager(activity)
         val rvAdapter = AlarmsRWAdapter(alarms)
 
-        createFakeDataForAlarm(rvAdapter)
+        fillUpRV(rvAdapter)
 
         val recyclerView = view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.apply {
             layoutManager = rvManager
@@ -86,12 +86,13 @@ class AlarmsListFragment: Fragment() {
 
     }
 
-    private fun createFakeDataForAlarm(rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
+    private fun fillUpRV(rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
 
         activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
+                    alarms.clear()
                     alarms.addAll(it)
                     rvAdapter.notifyDataSetChanged()
                 })
