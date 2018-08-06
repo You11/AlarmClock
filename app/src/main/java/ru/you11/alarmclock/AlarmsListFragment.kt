@@ -9,13 +9,8 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.RelativeLayout
-import android.widget.Switch
-import android.widget.TextView
+import android.view.*
+import android.widget.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
@@ -23,6 +18,11 @@ class AlarmsListFragment: Fragment() {
 
     private lateinit var activity: MainActivity
     private val alarms = ArrayList<Alarm>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity = this.getActivity() as MainActivity
@@ -33,18 +33,27 @@ class AlarmsListFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        setupAddButton()
         setupStopButton()
         setupDeleteButton()
         setupRecyclerView()
     }
 
-    private fun setupAddButton() {
-        view?.findViewById<Button>(R.id.all_alarms_add_button)?.apply {
-            setOnClickListener {
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater?.inflate(R.menu.main_activity_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.menu_activity_main_add -> {
                 startFragment(activity, null)
             }
+
+            R.id.menu_activity_main_settings -> {
+                Toast.makeText(activity, "meow", Toast.LENGTH_SHORT).show()
+            }
         }
+
+        return super.onOptionsItemSelected(item)
     }
 
     private fun setupStopButton() {
