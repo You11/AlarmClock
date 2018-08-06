@@ -18,20 +18,14 @@ import java.util.*
 class Utils {
 
     private val ALARM_NOTIFICATION_ID = 100
+    private val NOTIFICATION_REQUEST_CODE = 101
+
 
     fun createAlarmInDatabase(alarm: Alarm, disposable: CompositeDisposable, viewModel: AlarmViewModel) {
-        disposable.add(viewModel.getAlarmList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    if (alarm.aid == null) {
-                        alarm.aid = it.count()
-                    }
-                    disposable.add(viewModel.updateAlarm(alarm)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe())
-                })
+        disposable.add(viewModel.updateAlarm(alarm)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe())
     }
 
     fun setupAlarm(alarm: Alarm, activity: AppCompatActivity) {
@@ -59,11 +53,16 @@ class Utils {
         notification.setContentText(Utils().getAlarmTime(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
+
+        val intent = Intent(activity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val pendingIntent = PendingIntent.getActivity(activity, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        notification.setContentIntent(pendingIntent)
+
         val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT > 26) {
-            //TODO: NAME???????
-            val notificationChannel = NotificationChannel("100", "name?????", NotificationManager.IMPORTANCE_DEFAULT)
+            val notificationChannel = NotificationChannel("100", "Alarm", NotificationManager.IMPORTANCE_DEFAULT)
             notificationManager.createNotificationChannel(notificationChannel)
         }
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
@@ -76,8 +75,10 @@ class Utils {
 
     fun getAlarmTime(hours: Int, minutes: Int): String {
         return if (minutes < 10) {
+            //xx:0x
             hours.toString() + ":0" + minutes.toString()
         } else {
+            //xx:xx
             hours.toString() + ":" + minutes.toString()
         }
     }

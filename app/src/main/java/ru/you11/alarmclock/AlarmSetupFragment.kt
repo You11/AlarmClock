@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -74,8 +75,6 @@ class AlarmSetupFragment: Fragment() {
             isEnabled = false
         }
 
-        val saveButton = view?.findViewById<Button>(R.id.alarm_setup_save_button)
-
         val selectedHour: Int
         val selectedMinute: Int
 
@@ -100,18 +99,30 @@ class AlarmSetupFragment: Fragment() {
                 hours = selectedHour,
                 minutes = selectedMinute,
                 isOn = true)
+
+        createAlarm(alarm, utils)
+    }
+
+    private fun createAlarm(alarm: Alarm, utils: Utils) {
         //TODO: dispose flowable onStop?
-        Flowable.just(utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe( {
-                    utils.setupAlarm(alarm, activity)
-                    utils.createNotification(alarm, activity)
-                    fragmentManager?.popBackStack()
-                }, {
-                    Toast.makeText(activity, "Error: " + it.localizedMessage, Toast.LENGTH_SHORT).show()
-                    saveButton?.isEnabled = true
-                    alarmTime.isEnabled = true
+        //gets all alarms to get id for new alarm
+        activity.disposable.add(activity.viewModel.getAlarmList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { allAlarms ->
+
+                    if (alarm.aid == null) {
+                        alarm.aid = allAlarms.count()
+                    }
+
+                    Flowable.just(utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
+                            .observeOn(Schedulers.io())
+                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                utils.setupAlarm(alarm, activity)
+                                utils.createNotification(alarm, activity)
+                                fragmentManager?.popBackStack()
+                            }
                 })
     }
 
