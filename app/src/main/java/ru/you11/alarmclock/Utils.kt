@@ -38,6 +38,11 @@ class Utils {
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
         calendar.set(Calendar.MINUTE, alarm.minutes)
         calendar.set(Calendar.SECOND, 0)
+
+        if (calendar.before(Calendar.getInstance())) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
     }
 
