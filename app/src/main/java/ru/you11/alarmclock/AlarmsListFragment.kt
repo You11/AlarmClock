@@ -18,7 +18,6 @@ import android.widget.Switch
 import android.widget.TextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import kotlin.math.acos
 
 class AlarmsListFragment: Fragment() {
 
@@ -100,9 +99,9 @@ class AlarmsListFragment: Fragment() {
         activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
+                .subscribe { list ->
                     alarms.clear()
-                    alarms.addAll(it)
+                    alarms.addAll(list.sortedWith(compareBy({ it.hours }, { it.minutes })))
                     rvAdapter.notifyDataSetChanged()
                 })
 
@@ -161,8 +160,8 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
             if (isChecked) {
                 //turn on alarm
                 buttonView.isEnabled = false
-                utils.setupAlarm(alarm, activity)
-                utils.createNotification(alarm, activity)
+                utils.setAlarm(alarm, activity)
+                utils.createAlarmNotification(alarm, activity)
                 activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid!!, true)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -173,7 +172,7 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
                 //turn off alarm
                 buttonView.isEnabled = false
                 utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
-                utils.dismissNotification(activity)
+                utils.dismissAlarmNotification(activity)
                 activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid!!, false)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())

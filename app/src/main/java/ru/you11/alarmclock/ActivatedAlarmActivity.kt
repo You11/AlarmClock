@@ -7,10 +7,8 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -69,7 +67,7 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
                             //sets alarm on one minute later
                             updateAlarmTime(alarm)
-                            Utils().setupAlarm(alarm, this@ActivatedAlarmActivity)
+                            Utils().setAlarm(alarm, this@ActivatedAlarmActivity)
                             finish()
                         })
             }

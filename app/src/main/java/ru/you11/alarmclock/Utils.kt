@@ -20,7 +20,6 @@ class Utils {
     private val ALARM_NOTIFICATION_ID = 100
     private val NOTIFICATION_REQUEST_CODE = 101
 
-
     fun createAlarmInDatabase(alarm: Alarm, disposable: CompositeDisposable, viewModel: AlarmViewModel) {
         disposable.add(viewModel.updateAlarm(alarm)
                     .subscribeOn(Schedulers.io())
@@ -28,7 +27,8 @@ class Utils {
                     .subscribe())
     }
 
-    fun setupAlarm(alarm: Alarm, activity: AppCompatActivity) {
+    //sets repeating alarm which goes off each day
+    fun setAlarm(alarm: Alarm, activity: AppCompatActivity) {
 
         val alarmIntent = setupAlarmIntent(alarm, activity)
 
@@ -42,16 +42,18 @@ class Utils {
         if (calendar.before(Calendar.getInstance())) {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
-        
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, alarmIntent)
     }
 
+    //stops alarms with given id
     fun stopAlarm(id: Int, alarmManager: AlarmManager, context: Context) {
         val alarmIntent = PendingIntent.getBroadcast(context, id, Intent(context, AlarmReceiver::class.java), 0)
         alarmManager.cancel(alarmIntent)
     }
 
-    fun createNotification(alarm: Alarm, activity: AppCompatActivity) {
+    //creates notification for alarm with time and on click event
+    fun createAlarmNotification(alarm: Alarm, activity: AppCompatActivity) {
         val notification = NotificationCompat.Builder(activity, "100")
         notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
         notification.setContentTitle("Alarm")
@@ -73,11 +75,12 @@ class Utils {
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
     }
 
-    fun dismissNotification(activity: AppCompatActivity) {
+    fun dismissAlarmNotification(activity: AppCompatActivity) {
         val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(ALARM_NOTIFICATION_ID)
     }
 
+    //returns time string for recycler view and notification
     fun getAlarmTime(hours: Int, minutes: Int): String {
         return if (minutes < 10) {
             //xx:0x
