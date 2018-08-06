@@ -1,10 +1,8 @@
 package ru.you11.alarmclock
 
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -32,6 +30,12 @@ class AlarmSetupFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
+        setupOnEdit()
+        setupSaveButton()
+        setupDeleteButton()
+    }
+
+    private fun setupOnEdit() {
         //TODO: check better
         if (arguments != null) {
             view?.findViewById<TextView>(R.id.alarm_name_setup)?.apply {
@@ -51,8 +55,9 @@ class AlarmSetupFragment: Fragment() {
                 }
             }
         }
+    }
 
-        //save alarm
+    private fun setupSaveButton() {
         view?.findViewById<Button>(R.id.alarm_setup_save_button)?.apply {
             setOnClickListener {
                 saveAlarm()
@@ -105,6 +110,47 @@ class AlarmSetupFragment: Fragment() {
                     Toast.makeText(activity, "Error: " + it.localizedMessage, Toast.LENGTH_SHORT).show()
                     saveButton?.isEnabled = true
                     alarmTime.isEnabled = true
+                })
+    }
+
+    private fun setupDeleteButton() {
+        view?.findViewById<Button>(R.id.alarm_setup_delete_button)?.apply {
+            if (arguments != null) {
+                setOnClickListener {
+                    val id = arguments?.getInt("alarmId")
+                    if (id != null) createConfirmDeletionDialog(id)
+                }
+            } else {
+                visibility = Button.GONE
+            }
+        }
+    }
+
+    private fun createConfirmDeletionDialog(id: Int) {
+        AlertDialog.Builder(activity).apply {
+            setTitle("Delete alarm?")
+            setPositiveButton("Yes") { dialog: DialogInterface, _: Int ->
+                deleteAlarm(id)
+                dialog.dismiss()
+            }
+
+            setNegativeButton("No") { dialog: DialogInterface, _: Int ->
+                dialog.cancel()
+            }
+            create()
+            show()
+        }
+    }
+
+    private fun deleteAlarm(id: Int) {
+        activity.disposable.add(activity.viewModel.deleteAlarm(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    //TODO: Cancel notification too
+                    val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+                    Utils().stopAlarm(id, alarmManager, activity)
+                    fragmentManager?.popBackStack()
                 })
     }
 

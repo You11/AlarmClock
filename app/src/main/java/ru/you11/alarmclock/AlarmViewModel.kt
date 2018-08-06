@@ -26,4 +26,10 @@ class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
             dataSource.deleteAll()
         }
     }
+
+    fun deleteAlarm(id: Int): Completable {
+        return Completable.fromAction {
+            dataSource.deleteAlarm(id)
+        }
+    }
 }

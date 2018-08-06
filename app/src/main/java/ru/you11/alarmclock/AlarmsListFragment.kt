@@ -59,8 +59,7 @@ class AlarmsListFragment: Fragment() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             for (alarm in it) {
-                                val alarmIntent = PendingIntent.getBroadcast(context, alarm.aid!!, Intent(context, AlarmReceiver::class.java), 0)
-                                alarmManager.cancel(alarmIntent)
+                                Utils().stopAlarm(alarm.aid!!, alarmManager, activity)
                             }
 
                             Log.d("alarm", "alarms stopped")

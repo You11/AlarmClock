@@ -2,6 +2,7 @@ package ru.you11.alarmclock
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -38,6 +39,11 @@ class Utils {
         calendar.set(Calendar.MINUTE, alarm.minutes)
         calendar.set(Calendar.SECOND, 0)
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+    }
+
+    fun stopAlarm(id: Int, alarmManager: AlarmManager, context: Context) {
+        val alarmIntent = PendingIntent.getBroadcast(context, id, Intent(context, AlarmReceiver::class.java), 0)
+        alarmManager.cancel(alarmIntent)
     }
 
     fun getAlarmTime(hours: Int, minutes: Int): String {
