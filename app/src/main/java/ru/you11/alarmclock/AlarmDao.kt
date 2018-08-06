@@ -18,6 +18,9 @@ interface AlarmDao {
     @Query("SELECT * FROM alarmData WHERE aid=:id")
     fun getAlarm(id: Int): Single<Alarm>
 
+    @Query("UPDATE alarmData SET isOn=:value WHERE aid=:id")
+    fun updateAlarmStatus(id: Int, value: Boolean)
+
     @Insert(onConflict = REPLACE)
     fun insert(alarm: Alarm)
 

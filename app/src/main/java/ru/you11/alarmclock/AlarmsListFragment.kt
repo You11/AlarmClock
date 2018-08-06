@@ -1,13 +1,9 @@
 package ru.you11.alarmclock
 
 import android.app.AlarmManager
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.NotificationCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
@@ -17,10 +13,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.Switch
 import android.widget.TextView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlin.math.acos
 
 class AlarmsListFragment: Fragment() {
 
@@ -116,24 +114,31 @@ class AlarmsListFragment: Fragment() {
 class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapter<AlarmsRWAdapter.ViewHolder> () {
 
 
-    class ViewHolder(val layout: LinearLayout) : RecyclerView.ViewHolder(layout) {
-        val name: TextView = layout.findViewById(R.id.alarm_name_text_view)
-        val time: TextView = layout.findViewById(R.id.alarm_time_text_view)
+    class ViewHolder(val layout: RelativeLayout) : RecyclerView.ViewHolder(layout) {
+        val name: TextView = layout.findViewById(R.id.alarm_card_name_text_view)
+        val time: TextView = layout.findViewById(R.id.alarm_card_time_text_view)
+        val switch: Switch = layout.findViewById(R.id.alarm_card_switch)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlarmsRWAdapter.ViewHolder {
 
         val layout = LayoutInflater.from(parent.context)
-                .inflate(R.layout.alarm_recycler_view_card, parent, false) as LinearLayout
+                .inflate(R.layout.alarm_recycler_view_card, parent, false) as RelativeLayout
 
         return ViewHolder(layout)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val alarm = alarms[position]
+        val utils = Utils()
 
         holder.name.text = alarm.name
-        holder.time.text = Utils().getAlarmTime(alarm.hours, alarm.minutes)
+        holder.time.text = utils.getAlarmTime(alarm.hours, alarm.minutes)
+
+        //turn alarm off/on
+        setupSwitch(holder, utils, alarm)
+
+        //edit alarm
         holder.layout.setOnClickListener {
             val activity = it.context as MainActivity
 
@@ -145,6 +150,37 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
             arguments.putInt("alarmMinute", alarm.minutes)
 
             startFragment(activity, arguments)
+        }
+    }
+
+    private fun setupSwitch(holder: ViewHolder, utils: Utils, alarm: Alarm) {
+        if (alarm.isOn) holder.switch.isChecked = true
+
+        holder.switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            val activity = buttonView.context as MainActivity
+            if (isChecked) {
+                //turn on alarm
+                buttonView.isEnabled = false
+                utils.setupAlarm(alarm, activity)
+                utils.createNotification(alarm, activity)
+                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid!!, true)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            buttonView.isEnabled = true
+                        })
+            } else {
+                //turn off alarm
+                buttonView.isEnabled = false
+                utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
+                utils.dismissNotification(activity)
+                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid!!, false)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            buttonView.isEnabled = true
+                        })
+            }
         }
     }
 

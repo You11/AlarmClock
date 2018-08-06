@@ -92,19 +92,21 @@ class AlarmSetupFragment: Fragment() {
             return
         }
 
+        val utils = Utils()
         val id: Int? = getAlarmId()
 
         val alarm = Alarm(aid = id,
                 name = alarmName?.text?.toString()!!,
                 hours = selectedHour,
-                minutes = selectedMinute)
-        //TODO: dispose onStop?
-        Flowable.just(Utils().createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
+                minutes = selectedMinute,
+                isOn = true)
+        //TODO: dispose flowable onStop?
+        Flowable.just(utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
                 .observeOn(Schedulers.io())
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe( {
-                    Utils().setupAlarm(alarm, activity)
-                    createNotification(alarm)
+                    utils.setupAlarm(alarm, activity)
+                    utils.createNotification(alarm, activity)
                     fragmentManager?.popBackStack()
                 }, {
                     Toast.makeText(activity, "Error: " + it.localizedMessage, Toast.LENGTH_SHORT).show()
@@ -152,21 +154,6 @@ class AlarmSetupFragment: Fragment() {
                     Utils().stopAlarm(id, alarmManager, activity)
                     fragmentManager?.popBackStack()
                 })
-    }
-
-    private fun createNotification(alarm: Alarm) {
-        val notification = NotificationCompat.Builder(activity, "100")
-        notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
-        notification.setContentTitle("Alarm")
-        notification.setContentText(Utils().getAlarmTime(alarm.hours, alarm.minutes))
-        notification.priority = NotificationCompat.PRIORITY_DEFAULT
-        val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT > 26) {
-            val notificationChannel = NotificationChannel("100", "name?????", NotificationManager.IMPORTANCE_DEFAULT)
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-        notificationManager.notify(100, notification.build())
     }
 
     private fun getAlarmId(): Int? {
