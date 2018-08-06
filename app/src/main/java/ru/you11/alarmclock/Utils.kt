@@ -40,6 +40,14 @@ class Utils {
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
     }
 
+    fun getAlarmTime(hours: Int, minutes: Int): String {
+        return if (minutes < 10) {
+            hours.toString() + ":0" + minutes.toString()
+        } else {
+            hours.toString() + ":" + minutes.toString()
+        }
+    }
+
     private fun setupAlarmIntent(alarm: Alarm, activity: AppCompatActivity): PendingIntent {
         val intent = Intent(activity, AlarmReceiver::class.java)
         intent.putExtra("alarmId", alarm.aid)

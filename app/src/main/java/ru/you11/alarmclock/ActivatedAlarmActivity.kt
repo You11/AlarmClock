@@ -96,6 +96,7 @@ class ActivatedAlarmActivity: AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         mediaPlayer.stop()
+        mediaPlayer.release()
         disposable.clear()
     }
 }

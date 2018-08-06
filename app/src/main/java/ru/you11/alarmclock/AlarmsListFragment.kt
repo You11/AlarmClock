@@ -1,10 +1,13 @@
 package ru.you11.alarmclock
 
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
@@ -131,7 +134,7 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
         val alarm = alarms[position]
 
         holder.name.text = alarm.name
-        holder.time.text = getAlarmTime(alarm.hours, alarm.minutes)
+        holder.time.text = Utils().getAlarmTime(alarm.hours, alarm.minutes)
         holder.layout.setOnClickListener {
             val activity = it.context as MainActivity
 
@@ -148,14 +151,6 @@ class AlarmsRWAdapter(private val alarms: ArrayList<Alarm>): RecyclerView.Adapte
 
     override fun getItemCount(): Int {
         return alarms.size
-    }
-
-    private fun getAlarmTime(hours: Int, minutes: Int): String {
-        return if (minutes < 10) {
-            hours.toString() + ":0" + minutes.toString()
-        } else {
-            hours.toString() + ":" + minutes.toString()
-        }
     }
 }
 

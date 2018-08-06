@@ -1,12 +1,16 @@
 package ru.you11.alarmclock
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -95,12 +99,28 @@ class AlarmSetupFragment: Fragment() {
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe( {
                     Utils().setupAlarm(alarm, activity)
+                    createNotification(alarm)
                     fragmentManager?.popBackStack()
                 }, {
                     Toast.makeText(activity, "Error: " + it.localizedMessage, Toast.LENGTH_SHORT).show()
                     saveButton?.isEnabled = true
                     alarmTime.isEnabled = true
                 })
+    }
+
+    private fun createNotification(alarm: Alarm) {
+        val notification = NotificationCompat.Builder(activity, "100")
+        notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
+        notification.setContentTitle("Alarm")
+        notification.setContentText(Utils().getAlarmTime(alarm.hours, alarm.minutes))
+        notification.priority = NotificationCompat.PRIORITY_DEFAULT
+        val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT > 26) {
+            val notificationChannel = NotificationChannel("100", "name?????", NotificationManager.IMPORTANCE_DEFAULT)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+        notificationManager.notify(100, notification.build())
     }
 
     private fun getAlarmId(): Int? {
