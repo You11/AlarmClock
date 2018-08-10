@@ -9,7 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -53,18 +52,15 @@ class Utils {
     }
 
     //creates notification for alarm with time and on click event
-    fun createAlarmNotification(alarm: Alarm, activity: AppCompatActivity) {
-        val notification = NotificationCompat.Builder(activity, "100")
-        notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
-        notification.setContentTitle("Alarm")
-        notification.setContentText(Utils().getAlarmTime(alarm.hours, alarm.minutes))
-        notification.priority = NotificationCompat.PRIORITY_DEFAULT
-        notification.setOngoing(true)
+    fun updateAlarmNotification(allAlarms: List<Alarm>, activity: AppCompatActivity) {
 
-        val intent = Intent(activity, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(activity, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        notification.setContentIntent(pendingIntent)
+        val alarm = getEarliestAlarm(allAlarms)
+        if (alarm == null) {
+            dismissAlarmNotification(activity)
+            return
+        }
+
+        val notification = setupNotification(activity, alarm)
 
         val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -75,7 +71,7 @@ class Utils {
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
     }
 
-    fun dismissAlarmNotification(activity: AppCompatActivity) {
+    private fun dismissAlarmNotification(activity: AppCompatActivity) {
         val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(ALARM_NOTIFICATION_ID)
     }
@@ -91,9 +87,48 @@ class Utils {
         }
     }
 
+    private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
+        var firstToRingAlarm = Alarm(hours = 24, minutes = 60, aid = -1)
+
+        for (alarm in allAlarms) {
+            if (alarm.isOn) {
+                if ((alarm.hours < firstToRingAlarm.hours) or (alarm.hours == firstToRingAlarm.hours && alarm.minutes < firstToRingAlarm.minutes)) {
+                    firstToRingAlarm = alarm
+                }
+            }
+        }
+
+        return if (firstToRingAlarm.aid == -1) {
+            //if no alarms are active
+            null
+        } else {
+            firstToRingAlarm
+        }
+    }
+
     private fun setupAlarmIntent(alarm: Alarm, activity: AppCompatActivity): PendingIntent {
         val intent = Intent(activity, AlarmReceiver::class.java)
         intent.putExtra("alarmId", alarm.aid)
         return PendingIntent.getBroadcast(activity, alarm.aid!!, intent, 0)
+    }
+
+    private fun setupNotification(activity: AppCompatActivity, alarm: Alarm): NotificationCompat.Builder {
+        val notification = NotificationCompat.Builder(activity, "100")
+        notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
+        notification.setContentTitle("Alarm")
+        notification.setContentText(Utils().getAlarmTime(alarm.hours, alarm.minutes))
+        notification.priority = NotificationCompat.PRIORITY_DEFAULT
+        notification.setOngoing(true)
+
+        setupNotificationIntent(activity, notification)
+
+        return notification
+    }
+
+    private fun setupNotificationIntent(activity: AppCompatActivity, notification: NotificationCompat.Builder) {
+        val intent = Intent(activity, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val pendingIntent = PendingIntent.getActivity(activity, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        notification.setContentIntent(pendingIntent)
     }
 }

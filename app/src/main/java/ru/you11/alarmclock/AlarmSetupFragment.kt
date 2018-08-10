@@ -88,7 +88,6 @@ class AlarmSetupFragment: Fragment() {
             return
         }
 
-        val utils = Utils()
         val id: Int? = getAlarmId()
 
         val alarm = Alarm(aid = id,
@@ -97,27 +96,32 @@ class AlarmSetupFragment: Fragment() {
                 minutes = selectedMinute,
                 isOn = true)
 
-        createAlarm(alarm, utils)
+        createAlarm(alarm)
     }
 
-    private fun createAlarm(alarm: Alarm, utils: Utils) {
+    private fun createAlarm(alarm: Alarm) {
+        val utils = Utils()
         //TODO: dispose flowable onStop?
         //gets all alarms to get id for new alarm
         activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { allAlarms ->
+                .subscribe { it ->
+
+                    val allAlarms = ArrayList<Alarm>()
+                    allAlarms.addAll(it)
 
                     if (alarm.aid == null) {
-                        alarm.aid = allAlarms.count()
+                        alarm.aid = it.count()
                     }
 
                     Flowable.just(utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
                             .observeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
                             .subscribe {
+                                allAlarms.add(alarm)
                                 utils.setAlarm(alarm, activity)
-                                utils.createAlarmNotification(alarm, activity)
+                                utils.updateAlarmNotification(allAlarms, activity)
                                 fragmentManager?.popBackStack()
                             }
                 })
