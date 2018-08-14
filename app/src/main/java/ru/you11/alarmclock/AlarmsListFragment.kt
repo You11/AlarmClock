@@ -2,6 +2,7 @@ package ru.you11.alarmclock
 
 import android.app.AlarmManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
@@ -45,11 +46,11 @@ class AlarmsListFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.menu_activity_main_add -> {
-                startFragment(activity, null)
+                startAlarmSetupFragment(activity, null)
             }
 
             R.id.menu_activity_main_settings -> {
-                Toast.makeText(activity, "meow", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(activity, SettingsActivity::class.java))
             }
         }
 
@@ -157,7 +158,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
             arguments.putInt("alarmHour", alarm.hours)
             arguments.putInt("alarmMinute", alarm.minutes)
 
-            startFragment(activity, arguments)
+            startAlarmSetupFragment(activity, arguments)
         }
     }
 
@@ -201,7 +202,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
     }
 }
 
-private fun startFragment(activity: AppCompatActivity, arguments: Bundle?) {
+private fun startAlarmSetupFragment(activity: AppCompatActivity, arguments: Bundle?) {
     val fragment = AlarmSetupFragment()
 
     if (arguments != null) fragment.arguments = arguments

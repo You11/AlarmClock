@@ -1,11 +1,13 @@
 package ru.you11.alarmclock
 
 import android.arch.lifecycle.ViewModelProviders
+import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.Toast
@@ -65,8 +67,8 @@ class ActivatedAlarmActivity: AppCompatActivity() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe { alarm ->
 
-                            //sets alarm on one minute later
-                            updateAlarmTime(alarm)
+                            val delayTime = getDelayAlarmTime()
+                            updateAlarmTime(alarm, delayTime)
                             Utils().setAlarm(alarm, this@ActivatedAlarmActivity)
                             finish()
                         })
@@ -74,9 +76,14 @@ class ActivatedAlarmActivity: AppCompatActivity() {
         }
     }
 
-    private fun updateAlarmTime(alarm: Alarm) {
+    private fun getDelayAlarmTime(): Int {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        return sharedPref.getString("pref_delay_time", "1").toInt()
+    }
+
+    private fun updateAlarmTime(alarm: Alarm, delayTime: Int) {
         val currentTime = Calendar.getInstance()
-        currentTime.add(Calendar.MINUTE, 1)
+        currentTime.add(Calendar.MINUTE, delayTime)
 
         alarm.hours = currentTime.get(Calendar.HOUR_OF_DAY)
         alarm.minutes = currentTime.get(Calendar.MINUTE)

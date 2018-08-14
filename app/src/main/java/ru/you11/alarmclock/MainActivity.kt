@@ -3,6 +3,7 @@ package ru.you11.alarmclock
 import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.view.Menu
@@ -18,6 +19,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+
         setContentView(R.layout.activity_main)
 
         viewModelFactory = Injection.provideViewModelFactory(this)

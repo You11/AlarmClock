@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:title="Delay time"
+        android:key="pref_delay_time"
+        android:dialogTitle="Set alarm delay time"
+        android:entries="@array/pref_delay_time"
+        android:entryValues="@array/pref_delay_time_values"
+        android:defaultValue="@string/pref_delay_time_default" />
+    <CheckBoxPreference
+        android:title="meow"
+        android:summary="meow23"
+        android:defaultValue="true"/>
+</PreferenceScreen>
