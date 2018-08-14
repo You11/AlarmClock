@@ -3,22 +3,24 @@
     <string name="add_alarm_button">Add</string>
     <string name="cancel_all_alarms_button">Cancel all</string>
     <string name="delete_all_alarms_button">Delete all</string>
-    
-    <string-array name="pref_delay_time">
-        <item>30 seconds</item>
+
+    <string name="pref_alarm_delay_time_key">pref_delay_time</string>
+    <string name="pref_alarm_delay_time_title">Alarm delay time</string>
+    <string name="pref_alarm_delay_time_dialog_title">Set alarm delay time</string>
+
+    <string-array name="pref_alarm_delay_time">
         <item>1 minute</item>
         <item>2 minutes</item>
         <item>3 minutes</item>
         <item>5 minutes</item>
     </string-array>
 
-    <string-array name="pref_delay_time_values">
-        <item>0.5</item>
+    <string-array name="pref_alarm_delay_time_values">
         <item>1</item>
         <item>2</item>
         <item>3</item>
         <item>5</item>
     </string-array>
 
-    <string name="pref_delay_time_default">1</string>
+    <string name="pref_alarm_delay_time_default">1</string>
 </resources>

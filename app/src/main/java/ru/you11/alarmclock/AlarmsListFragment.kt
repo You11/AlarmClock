@@ -14,6 +14,8 @@ import android.view.*
 import android.widget.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import java.text.DateFormat
+import java.util.*
 
 class AlarmsListFragment: Fragment() {
 
@@ -66,7 +68,7 @@ class AlarmsListFragment: Fragment() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             for (alarm in it) {
-                                Utils().stopAlarm(alarm.aid!!, alarmManager, activity)
+                                Utils.stopAlarm(alarm.aid!!, alarmManager, activity)
                             }
 
                             Log.d("alarm", "alarms stopped")
@@ -139,10 +141,9 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val alarm = allAlarms[position]
-        val utils = Utils()
 
         holder.name.text = alarm.name
-        holder.time.text = utils.getAlarmTime(alarm.hours, alarm.minutes)
+        holder.time.text = Utils.getAlarmTime(alarm.hours, alarm.minutes)
 
         //turn alarm off/on
         setupSwitch(holder.switch, alarm, position)
@@ -163,7 +164,6 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
     }
 
     private fun setupSwitch(switch: Switch, alarm: Alarm, position: Int) {
-        val utils = Utils()
 
         if (alarm.isOn) switch.isChecked = true
 
@@ -177,8 +177,8 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             allAlarms[position].isOn = true
-                            utils.setAlarm(alarm, activity)
-                            utils.updateAlarmNotification(allAlarms, activity)
+                            Utils.setAlarm(alarm, activity)
+                            Utils.updateAlarmNotification(allAlarms, activity)
                             buttonView.isEnabled = true
                         })
             } else {
@@ -189,8 +189,8 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             allAlarms[position].isOn = false
-                            utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
-                            utils.updateAlarmNotification(allAlarms, activity)
+                            Utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
+                            Utils.updateAlarmNotification(allAlarms, activity)
                             buttonView.isEnabled = true
                         })
             }

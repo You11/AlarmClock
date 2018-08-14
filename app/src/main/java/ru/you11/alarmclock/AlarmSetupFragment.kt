@@ -100,7 +100,6 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun createAlarm(alarm: Alarm) {
-        val utils = Utils()
         //TODO: dispose flowable onStop?
         //gets all alarms to get id for new alarm
         activity.disposable.add(activity.viewModel.getAlarmList()
@@ -115,13 +114,13 @@ class AlarmSetupFragment: Fragment() {
                         alarm.aid = it.count()
                     }
 
-                    Flowable.just(utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
+                    Flowable.just(Utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
                             .observeOn(Schedulers.io())
                             .subscribeOn(AndroidSchedulers.mainThread())
                             .subscribe {
                                 allAlarms.add(alarm)
-                                utils.setAlarm(alarm, activity)
-                                utils.updateAlarmNotification(allAlarms, activity)
+                                Utils.setAlarm(alarm, activity)
+                                Utils.updateAlarmNotification(allAlarms, activity)
                                 fragmentManager?.popBackStack()
                             }
                 })
@@ -163,7 +162,7 @@ class AlarmSetupFragment: Fragment() {
                 .subscribe {
                     //TODO: Cancel notification too
                     val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-                    Utils().stopAlarm(id, alarmManager, activity)
+                    Utils.stopAlarm(id, alarmManager, activity)
                     fragmentManager?.popBackStack()
                 })
     }

@@ -1,7 +1,6 @@
 package ru.you11.alarmclock
 
 import android.arch.lifecycle.ViewModelProviders
-import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -69,7 +68,7 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
                             val delayTime = getDelayAlarmTime()
                             updateAlarmTime(alarm, delayTime)
-                            Utils().setAlarm(alarm, this@ActivatedAlarmActivity)
+                            Utils.setAlarm(alarm, this@ActivatedAlarmActivity)
                             finish()
                         })
             }
@@ -78,7 +77,8 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
     private fun getDelayAlarmTime(): Int {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-        return sharedPref.getString("pref_delay_time", "1").toInt()
+        return sharedPref.getString(resources.getString(R.string.pref_alarm_delay_time_key),
+                resources.getString(R.string.pref_alarm_delay_time_default)).toInt()
     }
 
     private fun updateAlarmTime(alarm: Alarm, delayTime: Int) {

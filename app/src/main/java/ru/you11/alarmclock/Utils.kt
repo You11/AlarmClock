@@ -12,9 +12,10 @@ import android.support.v7.app.AppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.text.DateFormat
 import java.util.*
 
-class Utils {
+object Utils {
 
     private val ALARM_NOTIFICATION_ID = 100
     private val NOTIFICATION_REQUEST_CODE = 101
@@ -78,13 +79,12 @@ class Utils {
 
     //returns time string for recycler view and notification
     fun getAlarmTime(hours: Int, minutes: Int): String {
-        return if (minutes < 10) {
-            //xx:0x
-            hours.toString() + ":0" + minutes.toString()
-        } else {
-            //xx:xx
-            hours.toString() + ":" + minutes.toString()
-        }
+
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, hours)
+        calendar.set(Calendar.MINUTE, minutes)
+
+        return DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time)
     }
 
     private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
@@ -116,7 +116,7 @@ class Utils {
         val notification = NotificationCompat.Builder(activity, "100")
         notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
         notification.setContentTitle("Alarm")
-        notification.setContentText(Utils().getAlarmTime(alarm.hours, alarm.minutes))
+        notification.setContentText(Utils.getAlarmTime(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
 
