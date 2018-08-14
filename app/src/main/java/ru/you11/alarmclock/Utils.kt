@@ -1,9 +1,7 @@
 package ru.you11.alarmclock
 
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -17,8 +15,8 @@ import java.util.*
 
 object Utils {
 
-    private val ALARM_NOTIFICATION_ID = 100
-    private val NOTIFICATION_REQUEST_CODE = 101
+    private const val ALARM_NOTIFICATION_ID = 100
+    private const val NOTIFICATION_REQUEST_CODE = 101
 
     fun createAlarmInDatabase(alarm: Alarm, disposable: CompositeDisposable, viewModel: AlarmViewModel) {
         disposable.add(viewModel.updateAlarm(alarm)
@@ -28,11 +26,11 @@ object Utils {
     }
 
     //sets repeating alarm which goes off each day
-    fun setAlarm(alarm: Alarm, activity: AppCompatActivity) {
+    fun setAlarm(alarm: Alarm, context: Context) {
 
-        val alarmIntent = setupAlarmIntent(alarm, activity)
+        val alarmIntent = setupAlarmIntent(alarm, context)
 
-        val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
@@ -53,17 +51,17 @@ object Utils {
     }
 
     //creates notification for alarm with time and on click event
-    fun updateAlarmNotification(allAlarms: List<Alarm>, activity: AppCompatActivity) {
+    fun updateAlarmNotification(allAlarms: List<Alarm>, context: Context) {
 
         val alarm = getEarliestAlarm(allAlarms)
         if (alarm == null) {
-            dismissAlarmNotification(activity)
+            dismissAlarmNotification(context)
             return
         }
 
-        val notification = setupNotification(activity, alarm)
+        val notification = setupNotification(context, alarm)
 
-        val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT > 26) {
             val notificationChannel = NotificationChannel("100", "Alarm", NotificationManager.IMPORTANCE_DEFAULT)
@@ -72,8 +70,8 @@ object Utils {
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
     }
 
-    private fun dismissAlarmNotification(activity: AppCompatActivity) {
-        val notificationManager = activity.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private fun dismissAlarmNotification(context: Context) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(ALARM_NOTIFICATION_ID)
     }
 
@@ -106,29 +104,29 @@ object Utils {
         }
     }
 
-    private fun setupAlarmIntent(alarm: Alarm, activity: AppCompatActivity): PendingIntent {
-        val intent = Intent(activity, AlarmReceiver::class.java)
+    private fun setupAlarmIntent(alarm: Alarm, context: Context): PendingIntent {
+        val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("alarmId", alarm.aid)
-        return PendingIntent.getBroadcast(activity, alarm.aid!!, intent, 0)
+        return PendingIntent.getBroadcast(context, alarm.aid!!, intent, 0)
     }
 
-    private fun setupNotification(activity: AppCompatActivity, alarm: Alarm): NotificationCompat.Builder {
-        val notification = NotificationCompat.Builder(activity, "100")
+    private fun setupNotification(context: Context, alarm: Alarm): NotificationCompat.Builder {
+        val notification = NotificationCompat.Builder(context, "100")
         notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
         notification.setContentTitle("Alarm")
         notification.setContentText(Utils.getAlarmTime(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
 
-        setupNotificationIntent(activity, notification)
+        setupNotificationIntent(context, notification)
 
         return notification
     }
 
-    private fun setupNotificationIntent(activity: AppCompatActivity, notification: NotificationCompat.Builder) {
-        val intent = Intent(activity, MainActivity::class.java)
+    private fun setupNotificationIntent(context: Context, notification: NotificationCompat.Builder) {
+        val intent = Intent(context, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(activity, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         notification.setContentIntent(pendingIntent)
     }
 }
