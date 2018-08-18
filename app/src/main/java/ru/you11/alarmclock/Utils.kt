@@ -1,12 +1,10 @@
 package ru.you11.alarmclock
 
 import android.app.*
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
-import android.support.v7.app.AppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -86,22 +84,33 @@ object Utils {
     }
 
     private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
-        var firstToRingAlarm = Alarm(hours = 24, minutes = 60, aid = -1)
+
+        val DAY_IN_MINUTES = 24 * 60
+
+        var earliestAlarm: Alarm? = null
+        var minimum = DAY_IN_MINUTES
+
+        val currentTime = Calendar.getInstance()
+        val currentMinutes = currentTime.get(Calendar.HOUR_OF_DAY) * 60 + currentTime.get(Calendar.MINUTE)
 
         for (alarm in allAlarms) {
             if (alarm.isOn) {
-                if ((alarm.hours < firstToRingAlarm.hours) or (alarm.hours == firstToRingAlarm.hours && alarm.minutes < firstToRingAlarm.minutes)) {
-                    firstToRingAlarm = alarm
+                val alarmMinutes = alarm.hours * 60 + alarm.minutes
+                var timeInMinutesToAlarm = alarmMinutes - currentMinutes
+                if (alarmMinutes < currentMinutes) {
+                    timeInMinutesToAlarm += DAY_IN_MINUTES
                 }
+
+                if (timeInMinutesToAlarm < minimum) {
+                    minimum = timeInMinutesToAlarm
+                    earliestAlarm = alarm
+                }
+
+
             }
         }
 
-        return if (firstToRingAlarm.aid == -1) {
-            //if no alarms are active
-            null
-        } else {
-            firstToRingAlarm
-        }
+        return earliestAlarm
     }
 
     private fun setupAlarmIntent(alarm: Alarm, context: Context): PendingIntent {
