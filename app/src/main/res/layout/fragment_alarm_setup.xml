@@ -1,42 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp">
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/alarm_name_setup"
-        android:hint="name or whatever" />
-
-    <TimePicker
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/alarm_time_setup">
-
-    </TimePicker>
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="end"
-        style="?android:buttonBarStyle">
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <Button
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="save"
-            android:id="@+id/alarm_setup_save_button"
-            style="?android:buttonBarButtonStyle"/>
+            android:id="@+id/alarm_setup_name"
+            android:hint="name or whatever" />
 
-        <Button
+        <TimePicker
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="delete"
-            android:id="@+id/alarm_setup_delete_button"
-            style="?android:buttonBarButtonStyle"/>
+            android:id="@+id/alarm_setup_time">
+
+        </TimePicker>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Вибрация"/>
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/alarm_setup_vibrate_checkbox" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            style="?android:buttonBarStyle">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="save"
+                android:id="@+id/alarm_setup_save_button"
+                style="?android:buttonBarButtonStyle"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="delete"
+                android:id="@+id/alarm_setup_delete_button"
+                style="?android:buttonBarButtonStyle"/>
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

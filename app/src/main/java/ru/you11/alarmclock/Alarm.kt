@@ -10,5 +10,6 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int? = null,
                  @ColumnInfo(name = "name") var name: String = "",
                  @ColumnInfo(name = "hours") var hours: Int = -1,
                  @ColumnInfo(name = "minutes") var minutes: Int = -1,
+                 @ColumnInfo(name = "isVibrate") var vibrate: Boolean = false,
                  @ColumnInfo(name = "isOn") var isOn: Boolean = false
 )

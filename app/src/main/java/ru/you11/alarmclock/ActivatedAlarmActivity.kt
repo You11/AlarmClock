@@ -1,13 +1,17 @@
 package ru.you11.alarmclock
 
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -17,10 +21,12 @@ import java.util.*
 
 class ActivatedAlarmActivity: AppCompatActivity() {
 
+    private lateinit var alarm: Alarm
     private val disposable = CompositeDisposable()
     private lateinit var viewModel: AlarmViewModel
     private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
     private val mediaPlayer = MediaPlayer()
+    private lateinit var vibrator: Vibrator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,10 +34,21 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
         viewModelFactory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
-        setupMediaPlayer()
-        setupDelayButton()
-        setupTurnOffButton()
+        val alarmId = intent.extras.getInt("alarmId")
+
+        disposable.add(viewModel.getAlarm(alarmId)
+                .subscribeOn(Schedulers.single())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { alarm ->
+                    this.alarm = alarm
+
+                    setupMediaPlayer()
+                    makeNoise()
+                    setupDelayButton()
+                    setupTurnOffButton()
+                })
     }
 
     private fun setupMediaPlayer() {
@@ -47,9 +64,26 @@ class ActivatedAlarmActivity: AppCompatActivity() {
         val url = "https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/5/58/Pain_pain_17.mp3"
         mediaPlayer.setDataSource(url)
         mediaPlayer.prepareAsync()
+    }
+
+    private fun makeNoise() {
         mediaPlayer.setOnPreparedListener {
+            if (alarm.vibrate) {
+                vibrate()
+            }
             Toast.makeText(this, "prepared!", Toast.LENGTH_SHORT).show()
             mediaPlayer.start()
+        }
+    }
+
+    private fun vibrate() {
+        val pattern = longArrayOf(0, 1000, 1000)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0))
+            Log.d("vibration", "vibrated")
+        } else {
+            vibrator.vibrate(pattern, 0)
+            Log.d("vibration", "vibrated")
         }
     }
 
@@ -59,18 +93,10 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
                 this.isEnabled = false
 
-                val alarmId = intent.extras.getInt("alarmId")
-
-                disposable.add(viewModel.getAlarm(alarmId)
-                        .subscribeOn(Schedulers.single())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe { alarm ->
-
-                            val delayTime = getDelayAlarmTime()
-                            updateAlarmTime(alarm, delayTime)
-                            Utils.setAlarm(alarm, this@ActivatedAlarmActivity)
-                            finish()
-                        })
+                val delayTime = getDelayAlarmTime()
+                updateAlarmTime(alarm, delayTime)
+                Utils.setAlarm(alarm, this@ActivatedAlarmActivity)
+                finish()
             }
         }
     }
@@ -92,7 +118,6 @@ class ActivatedAlarmActivity: AppCompatActivity() {
     private fun setupTurnOffButton() {
         findViewById<Button>(R.id.activated_alarm_turn_off_button).apply {
             setOnClickListener {
-                mediaPlayer.stop()
                 finish()
             }
         }
@@ -102,6 +127,7 @@ class ActivatedAlarmActivity: AppCompatActivity() {
         super.onStop()
         mediaPlayer.stop()
         mediaPlayer.release()
+        vibrator.cancel()
         disposable.clear()
     }
 }

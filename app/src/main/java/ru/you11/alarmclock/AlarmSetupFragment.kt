@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,11 +37,11 @@ class AlarmSetupFragment: Fragment() {
     private fun setupOnEdit() {
         //TODO: check better
         if (arguments != null) {
-            view?.findViewById<TextView>(R.id.alarm_name_setup)?.apply {
+            view?.findViewById<TextView>(R.id.alarm_setup_name)?.apply {
                 text = this@AlarmSetupFragment.arguments?.getString("alarmName")
             }
 
-            view?.findViewById<TimePicker>(R.id.alarm_time_setup)?.apply {
+            view?.findViewById<TimePicker>(R.id.alarm_setup_time)?.apply {
                 val alarmHour = this@AlarmSetupFragment.arguments?.getInt("alarmHour")!!
                 val alarmMinute = this@AlarmSetupFragment.arguments?.getInt("alarmMinute")!!
 
@@ -65,10 +66,13 @@ class AlarmSetupFragment: Fragment() {
 
     private fun saveAlarm() {
 
-        val alarmName = view?.findViewById<EditText>(R.id.alarm_name_setup)?.apply {
+        val alarmName = view?.findViewById<EditText>(R.id.alarm_setup_name)?.apply {
             isEnabled = false
         }
-        val alarmTime = view?.findViewById<TimePicker>(R.id.alarm_time_setup)?.apply {
+        val alarmTime = view?.findViewById<TimePicker>(R.id.alarm_setup_time)?.apply {
+            isEnabled = false
+        }
+        val isAlarmVibratingCheckbox = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox)?.apply {
             isEnabled = false
         }
 
@@ -88,12 +92,15 @@ class AlarmSetupFragment: Fragment() {
             return
         }
 
+        val isAlarmVibrating = isAlarmVibratingCheckbox?.isChecked!!
+
         val id: Int? = getAlarmId()
 
         val alarm = Alarm(aid = id,
                 name = alarmName?.text?.toString()!!,
                 hours = selectedHour,
                 minutes = selectedMinute,
+                vibrate = isAlarmVibrating,
                 isOn = true)
 
         createAlarm(alarm)
