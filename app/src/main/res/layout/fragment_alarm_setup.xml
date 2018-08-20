@@ -10,17 +10,19 @@
         android:padding="10dp">
 
         <EditText
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/alarm_setup_name"
-            android:hint="name or whatever" />
+            android:hint="name or whatever"
+            android:paddingBottom="10dp"
+            android:textSize="18sp"/>
 
-        <TimePicker
-            android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/alarm_setup_time">
-
-        </TimePicker>
+            android:id="@+id/alarm_setup_time"
+            android:paddingBottom="10dp"
+            android:textSize="18sp"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -29,7 +31,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Вибрация"/>
+                android:text="Вибрация"
+                android:textSize="18sp"/>
 
             <CheckBox
                 android:layout_width="wrap_content"
@@ -57,6 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="delete"
+                android:visibility="gone"
                 android:id="@+id/alarm_setup_delete_button"
                 style="?android:buttonBarButtonStyle"/>
         </LinearLayout>

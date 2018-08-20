@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,10 +14,13 @@ import android.widget.*
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import java.text.DateFormat
+import java.util.*
 
 class AlarmSetupFragment: Fragment() {
 
     private lateinit var activity: MainActivity
+    private val alarm = Alarm()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity = this.getActivity() as MainActivity
@@ -29,29 +31,52 @@ class AlarmSetupFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        setupOnEdit()
+        //TODO: check better
+        if (arguments != null) {
+            setupOnEdit()
+        } else {
+            setupTimePicker(null)
+        }
+
         setupSaveButton()
-        setupDeleteButton()
     }
 
     private fun setupOnEdit() {
-        //TODO: check better
-        if (arguments != null) {
-            view?.findViewById<TextView>(R.id.alarm_setup_name)?.apply {
-                text = this@AlarmSetupFragment.arguments?.getString("alarmName")
-            }
+        view?.findViewById<TextView>(R.id.alarm_setup_name)?.apply {
+            text = this@AlarmSetupFragment.arguments?.getString("alarmName")
+        }
 
-            view?.findViewById<TimePicker>(R.id.alarm_setup_time)?.apply {
-                val alarmHour = this@AlarmSetupFragment.arguments?.getInt("alarmHour")!!
-                val alarmMinute = this@AlarmSetupFragment.arguments?.getInt("alarmMinute")!!
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, this@AlarmSetupFragment.arguments?.getInt("alarmHour")!!)
+        calendar.set(Calendar.MINUTE, this@AlarmSetupFragment.arguments?.getInt("alarmMinute")!!)
+        setupTimePicker(calendar)
+        setupDeleteButton()
+    }
 
-                if (Build.VERSION.SDK_INT >= 23) {
-                    hour = alarmHour
-                    minute = alarmMinute
-                } else {
-                    currentHour = alarmHour
-                    currentMinute = alarmMinute
+    private fun setupTimePicker(editTime: Calendar?) {
+        view?.findViewById<TextView>(R.id.alarm_setup_time)?.apply {
+
+            val time: Calendar = editTime ?: Calendar.getInstance()
+
+            text = DateFormat.getTimeInstance(DateFormat.SHORT).format(time.time)
+
+            setOnClickListener {
+
+                val listener = TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
+                    alarm.hours = hourOfDay
+                    alarm.minutes = minute
+
+                    time.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    time.set(Calendar.MINUTE, minute)
+                    text = DateFormat.getTimeInstance(DateFormat.SHORT).format(time.time)
                 }
+
+                val dialog = TimePickerDialog(activity,
+                        listener,
+                        time.get(Calendar.HOUR_OF_DAY),
+                        time.get(Calendar.MINUTE),
+                        true)
+                dialog.show()
             }
         }
     }
@@ -66,44 +91,24 @@ class AlarmSetupFragment: Fragment() {
 
     private fun saveAlarm() {
 
-        val alarmName = view?.findViewById<EditText>(R.id.alarm_setup_name)?.apply {
-            isEnabled = false
-        }
-        val alarmTime = view?.findViewById<TimePicker>(R.id.alarm_setup_time)?.apply {
-            isEnabled = false
-        }
-        val isAlarmVibratingCheckbox = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox)?.apply {
-            isEnabled = false
-        }
+        val alarmNameView = view?.findViewById<EditText>(R.id.alarm_setup_name) ?: throw Exception("Name view is null")
+        val alarmTimeView = view?.findViewById<TextView>(R.id.alarm_setup_time) ?: throw Exception("Time view is null")
+        val isAlarmVibratingView = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox) ?: throw Exception("Checkbox view is null")
+        disableUI(alarmNameView, alarmTimeView, isAlarmVibratingView)
 
-        val selectedHour: Int
-        val selectedMinute: Int
-
-        if (alarmTime != null) {
-            if (Build.VERSION.SDK_INT >= 23) {
-                selectedHour = alarmTime.hour
-                selectedMinute = alarmTime.minute
-            }
-            else {
-                selectedHour = alarmTime.currentHour
-                selectedMinute = alarmTime.currentMinute
-            }
-        } else {
-            return
-        }
-
-        val isAlarmVibrating = isAlarmVibratingCheckbox?.isChecked!!
-
-        val id: Int? = getAlarmId()
-
-        val alarm = Alarm(aid = id,
-                name = alarmName?.text?.toString()!!,
-                hours = selectedHour,
-                minutes = selectedMinute,
-                vibrate = isAlarmVibrating,
-                isOn = true)
+        alarm.aid = getAlarmId()
+        alarm.name = alarmNameView.text?.toString()!!
+        alarm.vibrate = isAlarmVibratingView.isChecked
+        alarm.isOn = true
 
         createAlarm(alarm)
+    }
+
+    private fun disableUI(vararg args: View) {
+        args.forEach {
+            it.isEnabled = false
+        }
+
     }
 
     private fun createAlarm(alarm: Alarm) {
@@ -135,13 +140,10 @@ class AlarmSetupFragment: Fragment() {
 
     private fun setupDeleteButton() {
         view?.findViewById<Button>(R.id.alarm_setup_delete_button)?.apply {
-            if (arguments != null) {
-                setOnClickListener {
-                    val id = arguments?.getInt("alarmId")
-                    if (id != null) createConfirmDeletionDialog(id)
-                }
-            } else {
-                visibility = Button.GONE
+            visibility = Button.VISIBLE
+            setOnClickListener {
+                val id = arguments?.getInt("alarmId")
+                if (id != null) createConfirmDeletionDialog(id)
             }
         }
     }
