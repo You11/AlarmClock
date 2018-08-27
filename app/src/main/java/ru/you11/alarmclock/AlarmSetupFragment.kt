@@ -174,8 +174,8 @@ class AlarmSetupFragment: Fragment() {
                     if (alarm.aid == null) alarm.aid = getNewAlarmId(it)
 
                     Flowable.just(Utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
-                            .observeOn(Schedulers.io())
-                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribeOn(Schedulers.io())
                             .subscribe {
                                 allAlarms.add(alarm)
                                 Utils.setAlarm(alarm, activity)
@@ -210,10 +210,15 @@ class AlarmSetupFragment: Fragment() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
-                    //TODO: Cancel notification too
-                    val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-                    Utils.stopAlarm(id, alarmManager, activity)
-                    fragmentManager?.popBackStack()
+                    activity.disposable.add(activity.viewModel.getAlarmList()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+                                Utils.stopAlarm(id, alarmManager, activity)
+                                Utils.updateAlarmNotification(it, activity)
+                                fragmentManager?.popBackStack()
+                            })
                 })
     }
 }

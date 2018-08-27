@@ -151,8 +151,6 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
         //edit alarm
         holder.layout.setOnClickListener {
             val activity = it.context as MainActivity
-
-            //TODO: this is horrible, put in parcelable
             val arguments = Bundle()
             arguments.putParcelable("alarm", alarm)
 
