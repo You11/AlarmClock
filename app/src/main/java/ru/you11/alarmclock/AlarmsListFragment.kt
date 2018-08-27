@@ -154,10 +154,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
 
             //TODO: this is horrible, put in parcelable
             val arguments = Bundle()
-            arguments.putInt("alarmId", alarm.aid!!)
-            arguments.putString("alarmName", alarm.name)
-            arguments.putInt("alarmHour", alarm.hours)
-            arguments.putInt("alarmMinute", alarm.minutes)
+            arguments.putParcelable("alarm", alarm)
 
             startAlarmSetupFragment(activity, arguments)
         }

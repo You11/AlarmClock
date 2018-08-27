@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -16,11 +17,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.text.DateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class AlarmSetupFragment: Fragment() {
 
     private lateinit var activity: MainActivity
-    private val alarm = Alarm()
+    private var alarm = Alarm()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity = this.getActivity() as MainActivity
@@ -30,26 +32,27 @@ class AlarmSetupFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-
-        //TODO: check better
-        if (arguments != null) {
+        if (arguments != null && arguments?.getParcelable<Alarm>("alarm") != null) {
             setupOnEdit()
         } else {
-            setupTimePicker(null)
+            setupTimePicker(editTime = null)
         }
 
+        setupDays()
         setupSaveButton()
     }
 
     private fun setupOnEdit() {
+        alarm = arguments?.getParcelable("alarm")!!
         view?.findViewById<TextView>(R.id.alarm_setup_name)?.apply {
-            text = this@AlarmSetupFragment.arguments?.getString("alarmName")
+            text = alarm.name
         }
 
         val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, this@AlarmSetupFragment.arguments?.getInt("alarmHour")!!)
-        calendar.set(Calendar.MINUTE, this@AlarmSetupFragment.arguments?.getInt("alarmMinute")!!)
+        calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
+        calendar.set(Calendar.MINUTE, alarm.minutes)
         setupTimePicker(calendar)
+        setupVibrateCheckbox()
         setupDeleteButton()
     }
 
@@ -59,6 +62,8 @@ class AlarmSetupFragment: Fragment() {
             val time: Calendar = editTime ?: Calendar.getInstance()
 
             text = DateFormat.getTimeInstance(DateFormat.SHORT).format(time.time)
+            alarm.hours = time.get(Calendar.HOUR_OF_DAY)
+            alarm.minutes = time.get(Calendar.MINUTE)
 
             setOnClickListener {
 
@@ -81,10 +86,52 @@ class AlarmSetupFragment: Fragment() {
         }
     }
 
+    private fun setupDays() {
+        val daysViews = hashMapOf<String, TextView>("monday" to view?.findViewById(R.id.alarm_setup_days_monday)!!,
+                "tuesday" to view?.findViewById(R.id.alarm_setup_days_tuesday)!!,
+                "wednesday" to view?.findViewById(R.id.alarm_setup_days_wednesday)!!,
+                "thursday" to view?.findViewById(R.id.alarm_setup_days_thursday)!!,
+                "friday" to view?.findViewById(R.id.alarm_setup_days_friday)!!,
+                "saturday" to view?.findViewById(R.id.alarm_setup_days_saturday)!!,
+                "sunday" to view?.findViewById(R.id.alarm_setup_days_sunday)!!)
+
+
+        daysViews.forEach {
+            if (alarm.days[it.key] == true) {
+                it.value.setTextColor(Color.RED)
+            }
+
+            it.value.setOnClickListener { _ ->
+                if (alarm.days[it.key] == true) {
+                    it.value.setTextColor(Color.GRAY)
+                    alarm.days[it.key] = false
+                } else {
+                    it.value.setTextColor(Color.RED)
+                    alarm.days[it.key] = true
+                }
+            }
+        }
+    }
+
+    private fun setupVibrateCheckbox() {
+        view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox)?.apply {
+            this.isChecked = alarm.vibrate
+        }
+    }
+
     private fun setupSaveButton() {
         view?.findViewById<Button>(R.id.alarm_setup_save_button)?.apply {
             setOnClickListener {
                 saveAlarm()
+            }
+        }
+    }
+
+    private fun setupDeleteButton() {
+        view?.findViewById<Button>(R.id.alarm_setup_delete_button)?.apply {
+            visibility = Button.VISIBLE
+            setOnClickListener {
+                if (alarm.aid != null) createConfirmDeletionDialog(alarm.aid!!)
             }
         }
     }
@@ -96,10 +143,12 @@ class AlarmSetupFragment: Fragment() {
         val isAlarmVibratingView = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox) ?: throw Exception("Checkbox view is null")
         disableUI(alarmNameView, alarmTimeView, isAlarmVibratingView)
 
-        alarm.aid = getAlarmId()
         alarm.name = alarmNameView.text?.toString()!!
         alarm.vibrate = isAlarmVibratingView.isChecked
         alarm.isOn = true
+        if (alarm.aid != null) {
+            Utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
+        }
 
         createAlarm(alarm)
     }
@@ -122,9 +171,7 @@ class AlarmSetupFragment: Fragment() {
                     val allAlarms = ArrayList<Alarm>()
                     allAlarms.addAll(it)
 
-                    if (alarm.aid == null) {
-                        alarm.aid = it.count()
-                    }
+                    if (alarm.aid == null) alarm.aid = getNewAlarmId(it)
 
                     Flowable.just(Utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
                             .observeOn(Schedulers.io())
@@ -138,14 +185,8 @@ class AlarmSetupFragment: Fragment() {
                 })
     }
 
-    private fun setupDeleteButton() {
-        view?.findViewById<Button>(R.id.alarm_setup_delete_button)?.apply {
-            visibility = Button.VISIBLE
-            setOnClickListener {
-                val id = arguments?.getInt("alarmId")
-                if (id != null) createConfirmDeletionDialog(id)
-            }
-        }
+    private fun getNewAlarmId(alarms: List<Alarm>): Int {
+        return alarms.count()
     }
 
     private fun createConfirmDeletionDialog(id: Int) {
@@ -174,24 +215,5 @@ class AlarmSetupFragment: Fragment() {
                     Utils.stopAlarm(id, alarmManager, activity)
                     fragmentManager?.popBackStack()
                 })
-    }
-
-    private fun getAlarmId(): Int? {
-        val id: Int?
-
-        if (arguments != null) {
-            id = arguments?.getInt("alarmId")
-            cancelExistingAlarm(id)
-        } else {
-            id = null
-        }
-
-        return id
-    }
-
-    private fun cancelExistingAlarm(id: Int?) {
-        val alarmManager = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = PendingIntent.getBroadcast(context, id!!, Intent(context, AlarmReceiver::class.java), 0)
-        alarmManager.cancel(alarmIntent)
     }
 }
