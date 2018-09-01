@@ -178,7 +178,7 @@ class AlarmSetupFragment: Fragment() {
                             .subscribeOn(Schedulers.io())
                             .subscribe {
                                 allAlarms.add(alarm)
-                                Utils.setAlarm(alarm, activity)
+                                Utils.setAlarmWithDays(alarm, activity)
                                 Utils.updateAlarmNotification(allAlarms, activity)
                                 fragmentManager?.popBackStack()
                             }

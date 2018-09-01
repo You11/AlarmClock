@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
+import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -23,23 +24,54 @@ object Utils {
                     .subscribe())
     }
 
-    //sets repeating alarm which goes off each day
-    fun setAlarm(alarm: Alarm, context: Context) {
+    //triggers when user presses delay button
+    fun setDelayedAlarm(alarm: Alarm, context: Context) {
 
         val alarmIntent = setupAlarmIntent(alarm, context)
 
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
+
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
         calendar.set(Calendar.MINUTE, alarm.minutes)
         calendar.set(Calendar.SECOND, 0)
 
-        if (calendar.before(Calendar.getInstance())) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+    }
+
+    fun setAlarmWithDays(alarm: Alarm, context: Context) {
+        val alarmIntent = setupAlarmIntent(alarm, context)
+        val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
+        val currentDate = Calendar.getInstance()
+        var earliestAlarm: Calendar = Calendar.getInstance()
+        earliestAlarm.timeInMillis = Long.MAX_VALUE
+
+        alarm.days.forEach {
+            if (it.value) {
+                val alarmDate = Calendar.getInstance()
+                alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
+                alarmDate.set(Calendar.MINUTE, alarm.minutes)
+                alarmDate.set(Calendar.SECOND, 0)
+                alarmDate.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
+                if (alarmDate.before(currentDate)) {
+                    alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
+                }
+
+                if (alarmDate.before(earliestAlarm)) {
+                    earliestAlarm = alarmDate
+                }
+            }
         }
 
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, alarmIntent)
+        if (earliestAlarm.timeInMillis == Long.MAX_VALUE) {
+            throw Exception("days weren't selected")
+        }
+
+        Log.d("alarmTime", DateFormat.getTimeInstance(DateFormat.FULL).format(earliestAlarm.time))
+        Log.d("alarmDate", DateFormat.getDateInstance(DateFormat.FULL).format(earliestAlarm.time))
+
+        alarmManager.set(AlarmManager.RTC_WAKEUP, earliestAlarm.timeInMillis, alarmIntent)
     }
 
     //stops alarms with given id
@@ -85,28 +117,40 @@ object Utils {
 
     private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
 
-        val DAY_IN_MINUTES = 24 * 60
-
+        var earliestDate: Calendar = Calendar.getInstance()
+        earliestDate.timeInMillis = Long.MAX_VALUE
         var earliestAlarm: Alarm? = null
-        var minimum = DAY_IN_MINUTES
-
-        val currentTime = Calendar.getInstance()
-        val currentMinutes = currentTime.get(Calendar.HOUR_OF_DAY) * 60 + currentTime.get(Calendar.MINUTE)
 
         for (alarm in allAlarms) {
             if (alarm.isOn) {
-                val alarmMinutes = alarm.hours * 60 + alarm.minutes
-                var timeInMinutesToAlarm = alarmMinutes - currentMinutes
-                if (alarmMinutes < currentMinutes) {
-                    timeInMinutesToAlarm += DAY_IN_MINUTES
+                alarm.days.forEach {
+                    if (it.value) {
+                        val alarmDate = Calendar.getInstance()
+                        alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
+                        alarmDate.set(Calendar.MINUTE, alarm.minutes)
+                        alarmDate.set(Calendar.SECOND, 0)
+                        alarmDate.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
+                        if (alarmDate.before(Calendar.getInstance())) {
+                            alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
+                        }
+
+                        if (alarmDate.before(earliestDate)) {
+                            earliestDate = alarmDate
+                            earliestAlarm = alarm
+                        }
+                    }
                 }
+            }
+        }
 
-                if (timeInMinutesToAlarm < minimum) {
-                    minimum = timeInMinutesToAlarm
-                    earliestAlarm = alarm
+        if (earliestAlarm != null) {
+            val alarmDay = earliestDate[Calendar.DAY_OF_WEEK]
+            for (day in earliestAlarm!!.days) {
+                if (earliestAlarm!!.daysStringToCalendar[day.key] == alarmDay) {
+                    day.setValue(true)
+                } else {
+                    day.setValue(false)
                 }
-
-
             }
         }
 
@@ -122,8 +166,21 @@ object Utils {
     private fun setupNotification(context: Context, alarm: Alarm): NotificationCompat.Builder {
         val notification = NotificationCompat.Builder(context, "100")
         notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
-        notification.setContentTitle("Alarm")
-        notification.setContentText(Utils.getAlarmTime(alarm.hours, alarm.minutes))
+        if (alarm.name.isBlank()) {
+            notification.setContentTitle("Alarm")
+        } else {
+            notification.setContentTitle(alarm.name)
+        }
+
+        var day = ""
+
+        alarm.days.forEach {
+            if (it.value) {
+                day = it.key
+            }
+        }
+
+        notification.setContentText(day + ", " + Utils.getAlarmTime(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
 

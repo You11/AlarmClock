@@ -44,10 +44,21 @@ class ActivatedAlarmActivity: AppCompatActivity() {
                 .subscribe { alarm ->
                     this.alarm = alarm
 
+                    setupNewAlarm()
                     setupMediaPlayer()
                     makeNoise()
                     setupDelayButton()
                     setupTurnOffButton()
+                })
+    }
+
+    private fun setupNewAlarm() {
+        disposable.add(viewModel.getAlarmList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { allAlarms ->
+                    Utils.setAlarmWithDays(alarm, this@ActivatedAlarmActivity)
+                    Utils.updateAlarmNotification(allAlarms, this@ActivatedAlarmActivity)
                 })
     }
 
@@ -95,7 +106,7 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
                 val delayTime = getDelayAlarmTime()
                 updateAlarmTime(alarm, delayTime)
-                Utils.setAlarm(alarm, this@ActivatedAlarmActivity)
+                Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
                 finish()
             }
         }

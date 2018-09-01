@@ -2,7 +2,9 @@ package ru.you11.alarmclock
 
 import android.arch.persistence.room.*
 import android.os.Parcelable
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
+import java.util.*
 import kotlin.collections.HashMap
 
 @Parcelize
@@ -21,4 +23,15 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int? = null,
                          "saturday" to false,
                          "sunday" to false),
                  @ColumnInfo(name = "isOn") var isOn: Boolean = false
-): Parcelable
+): Parcelable {
+
+    @Ignore
+    @IgnoredOnParcel
+    val daysStringToCalendar = hashMapOf<String, Int>("monday" to Calendar.MONDAY,
+            "tuesday" to Calendar.TUESDAY,
+            "wednesday" to Calendar.WEDNESDAY,
+            "thursday" to Calendar.THURSDAY,
+            "friday" to Calendar.FRIDAY,
+            "saturday" to Calendar.SATURDAY,
+            "sunday" to Calendar.SUNDAY)
+}

@@ -172,7 +172,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             allAlarms[position].isOn = true
-                            Utils.setAlarm(alarm, activity)
+                            Utils.setAlarmWithDays(alarm, activity)
                             Utils.updateAlarmNotification(allAlarms, activity)
                             buttonView.isEnabled = true
                         })

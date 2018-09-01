@@ -22,7 +22,7 @@ class BootService: JobIntentService() {
                 .subscribe { alarmList ->
                     alarmList.forEach {
                         if (it.isOn) {
-                            Utils.setAlarm(it, this)
+                            Utils.setAlarmWithDays(it, this)
                         }
 
                         Utils.updateAlarmNotification(alarmList, this)
