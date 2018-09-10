@@ -9,7 +9,7 @@ import kotlin.collections.HashMap
 
 @Parcelize
 @Entity(tableName = "alarmData")
-@TypeConverters(DaysConventer::class)
+@TypeConverters(HashmapStringToBooleanConventer::class)
 data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int? = null,
                  @ColumnInfo(name = "name") var name: String = "",
                  @ColumnInfo(name = "hours") var hours: Int = -1,
@@ -22,12 +22,16 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int? = null,
                          "friday" to true,
                          "saturday" to false,
                          "sunday" to false),
+                 @ColumnInfo(name = "unlockType") var unlockType: HashMap<String, Boolean> = hashMapOf("buttonPress" to true,
+                         "buttonHold" to false,
+                         "shakeDevice" to false
+                 ),
                  @ColumnInfo(name = "isOn") var isOn: Boolean = false
 ): Parcelable {
 
     @Ignore
     @IgnoredOnParcel
-    val daysStringToCalendar = hashMapOf<String, Int>("monday" to Calendar.MONDAY,
+    val daysStringToCalendar = hashMapOf("monday" to Calendar.MONDAY,
             "tuesday" to Calendar.TUESDAY,
             "wednesday" to Calendar.WEDNESDAY,
             "thursday" to Calendar.THURSDAY,

@@ -117,6 +117,7 @@ object Utils {
 
     private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
 
+        //todo: refactoring
         var earliestDate: Calendar = Calendar.getInstance()
         earliestDate.timeInMillis = Long.MAX_VALUE
         var earliestAlarm: Alarm? = null

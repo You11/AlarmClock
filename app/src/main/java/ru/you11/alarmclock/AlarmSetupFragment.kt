@@ -3,9 +3,7 @@ package ru.you11.alarmclock
 import android.app.*
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -38,6 +36,7 @@ class AlarmSetupFragment: Fragment() {
             setupTimePicker(editTime = null)
         }
 
+        setupAlarmCancelButton()
         setupDays()
         setupSaveButton()
     }
@@ -81,6 +80,38 @@ class AlarmSetupFragment: Fragment() {
                         time.get(Calendar.HOUR_OF_DAY),
                         time.get(Calendar.MINUTE),
                         true)
+                dialog.show()
+            }
+        }
+    }
+
+    private fun setupAlarmCancelButton() {
+        view?.findViewById<TextView>(R.id.alarm_setup_unlock_type)?.apply {
+            setOnClickListener {
+
+                val methods = arrayOf("Press button", "Hold button", "Shake device")
+
+                val dialog = AlertDialog.Builder(activity)
+                dialog.setTitle("Pick alarm cancel type")
+                dialog.setItems(methods) { _, which ->
+                    for (unlock in alarm.unlockType) {
+                        unlock.setValue(false)
+                    }
+
+                    when (which) {
+                        0 -> {
+                            alarm.unlockType["buttonPress"] = true
+                        }
+
+                        1 -> {
+                            alarm.unlockType["buttonHold"] = true
+
+                        }
+
+                        2 -> alarm.unlockType["shakeDevice"] = true
+                    }
+                }
+                dialog.create()
                 dialog.show()
             }
         }

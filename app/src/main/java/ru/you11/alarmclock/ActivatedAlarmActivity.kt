@@ -2,6 +2,10 @@ package ru.you11.alarmclock
 
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -12,14 +16,18 @@ import android.os.Vibrator
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.*
+import java.util.concurrent.TimeUnit
 
-class ActivatedAlarmActivity: AppCompatActivity() {
+class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private lateinit var alarm: Alarm
     private val disposable = CompositeDisposable()
@@ -27,10 +35,12 @@ class ActivatedAlarmActivity: AppCompatActivity() {
     private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
     private val mediaPlayer = MediaPlayer()
     private lateinit var vibrator: Vibrator
+    private var lastShakeTime: Long = System.currentTimeMillis()
+    private lateinit var sensorManager: SensorManager
+    private var amountOfShakeTimes = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_activated_alarm)
 
         viewModelFactory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
@@ -43,16 +53,49 @@ class ActivatedAlarmActivity: AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { alarm ->
                     this.alarm = alarm
-
                     setupNewAlarm()
+
+                    var unlockType = ""
+                    alarm.unlockType.forEach {
+                        if (it.value)
+                            unlockType = it.key
+                    }
+                    if (unlockType == "") return@subscribe
+
                     setupMediaPlayer()
                     makeNoise()
-                    setupDelayButton()
-                    setupTurnOffButton()
+
+                    when (unlockType) {
+                        "buttonPress" -> {
+                            setContentView(R.layout.activity_activated_alarm_press)
+                            setupDelayButton()
+                            setupTurnOffButton()
+                        }
+
+                        "buttonHold" -> {
+                            setContentView(R.layout.activity_activated_alarm_hold)
+                            setupOnPressTurnOffButton()
+                        }
+
+                        "shakeDevice" -> {
+                            setContentView(R.layout.activity_activated_alarm_shake)
+                            setupShakeLayout()
+                        }
+                    }
                 })
     }
 
+    private fun setupShakeLayout() {
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+            changeTextInShakeDialog()
+        }
+    }
+
     private fun setupNewAlarm() {
+        //TODO: gets called when delay button pressed too
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -104,12 +147,17 @@ class ActivatedAlarmActivity: AppCompatActivity() {
 
                 this.isEnabled = false
 
-                val delayTime = getDelayAlarmTime()
-                updateAlarmTime(alarm, delayTime)
-                Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
-                finish()
+                delayAlarm()
             }
         }
+    }
+
+    private fun delayAlarm() {
+        val delayTime = getDelayAlarmTime()
+        updateAlarmTime(alarm, delayTime)
+        Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
+        Toast.makeText(this@ActivatedAlarmActivity, "Delayed", Toast.LENGTH_SHORT).show()
+        finish()
     }
 
     private fun getDelayAlarmTime(): Int {
@@ -134,11 +182,75 @@ class ActivatedAlarmActivity: AppCompatActivity() {
         }
     }
 
+    private fun setupOnPressTurnOffButton() {
+        findViewById<Button>(R.id.activated_alarm_delay_button).apply {
+            setOnTouchListener { v, event ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        Completable.timer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    Toast.makeText(this@ActivatedAlarmActivity, "Turn off", Toast.LENGTH_SHORT).show()
+                                    finish()
+                                }
+                        true
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        delayAlarm()
+                        true
+                    }
+
+                    else -> {
+                        false
+                    }
+                }
+            }
+        }
+    }
+
     override fun onStop() {
         super.onStop()
         mediaPlayer.stop()
         mediaPlayer.release()
         vibrator.cancel()
         disposable.clear()
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        val minTimeBetweenShakes: Long = 1000
+        val shakeThreshold = 3.25f
+
+        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER &&
+                System.currentTimeMillis() - lastShakeTime > minTimeBetweenShakes) {
+            val x = event.values[0].toDouble()
+            val y = event.values[1].toDouble()
+            val z = event.values[2].toDouble()
+
+            val acceleration = Math.sqrt(Math.pow(x, 2.0) +
+                    Math.pow(y, 2.0) +
+                    Math.pow(z, 2.0)) - SensorManager.GRAVITY_EARTH
+
+            if (acceleration > shakeThreshold) {
+                lastShakeTime = System.currentTimeMillis()
+
+                amountOfShakeTimes--
+                changeTextInShakeDialog()
+
+                if (amountOfShakeTimes == 0) {
+                    sensorManager.unregisterListener(this)
+                    finish()
+                }
+            }
+        }
+    }
+
+    private fun changeTextInShakeDialog() {
+        findViewById<TextView>(R.id.activated_alarm_shake_text).apply {
+            text = "Shake device " + amountOfShakeTimes.toString() + " times"
+        }
     }
 }

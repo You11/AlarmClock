@@ -43,7 +43,15 @@
 
         </RelativeLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Метод выключения"
+            android:id="@+id/alarm_setup_unlock_type"
+            android:textSize="18sp"/>
+
         <LinearLayout
+            android:paddingTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
