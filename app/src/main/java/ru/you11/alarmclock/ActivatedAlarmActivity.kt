@@ -17,6 +17,7 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -41,6 +42,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        wakeUpDevice()
 
         viewModelFactory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
@@ -85,6 +88,13 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                 })
     }
 
+    private fun wakeUpDevice() {
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+    }
+
     private fun setupShakeLayout() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -121,10 +131,10 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun makeNoise() {
+        if (alarm.vibrate) {
+            vibrate()
+        }
         mediaPlayer.setOnPreparedListener {
-            if (alarm.vibrate) {
-                vibrate()
-            }
             Toast.makeText(this, "prepared!", Toast.LENGTH_SHORT).show()
             mediaPlayer.start()
         }
@@ -210,10 +220,12 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     override fun onStop() {
         super.onStop()
-        mediaPlayer.stop()
-        mediaPlayer.release()
-        vibrator.cancel()
-        disposable.clear()
+        if (this.isFinishing) {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+            vibrator.cancel()
+            disposable.clear()
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -221,7 +233,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        val minTimeBetweenShakes: Long = 1000
+        val minTimeBetweenShakes: Long = 500
         val shakeThreshold = 3.25f
 
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER &&
