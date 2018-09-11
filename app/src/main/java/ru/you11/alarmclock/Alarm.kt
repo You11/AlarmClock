@@ -10,7 +10,7 @@ import kotlin.collections.HashMap
 @Parcelize
 @Entity(tableName = "alarmData")
 @TypeConverters(HashmapStringToBooleanConventer::class)
-data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int? = null,
+data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Int = 0,
                  @ColumnInfo(name = "name") var name: String = "",
                  @ColumnInfo(name = "hours") var hours: Int = -1,
                  @ColumnInfo(name = "minutes") var minutes: Int = -1,

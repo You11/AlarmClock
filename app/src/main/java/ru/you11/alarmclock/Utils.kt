@@ -72,6 +72,13 @@ object Utils {
         Log.d("alarmDate", DateFormat.getDateInstance(DateFormat.FULL).format(earliestAlarm.time))
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, earliestAlarm.timeInMillis, alarmIntent)
+        Log.d("alarmBug", "id: " + alarm.aid)
+        Log.d("alarmBug","alarm set: " + alarm.hours + ":" + alarm.minutes + ", name: " + alarm.name)
+        alarm.unlockType.forEach {
+            if (it.value) {
+                Log.d("alarmBug", "unlock type: " + it.key)
+            }
+        }
     }
 
     //stops alarms with given id

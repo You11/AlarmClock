@@ -11,6 +11,8 @@ import android.util.Log
 class AlarmReceiver: BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
+        Log.d("alarmBug", "received")
+
         //passing alarm id to new activity
         val newIntent = Intent(context, ActivatedAlarmActivity::class.java)
         newIntent.putExtra("alarmId", intent?.extras?.getInt("alarmId"))

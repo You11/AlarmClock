@@ -202,8 +202,6 @@ class AlarmSetupFragment: Fragment() {
                     val allAlarms = ArrayList<Alarm>()
                     allAlarms.addAll(it)
 
-                    if (alarm.aid == null) alarm.aid = getNewAlarmId(it)
-
                     Flowable.just(Utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribeOn(Schedulers.io())
@@ -214,10 +212,6 @@ class AlarmSetupFragment: Fragment() {
                                 fragmentManager?.popBackStack()
                             }
                 })
-    }
-
-    private fun getNewAlarmId(alarms: List<Alarm>): Int {
-        return alarms.count()
     }
 
     private fun createConfirmDeletionDialog(id: Int) {

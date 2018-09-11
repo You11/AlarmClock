@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.preference.PreferenceManager
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
@@ -43,6 +44,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.d("alarmBug", "onCreateLaunched")
         wakeUpDevice()
 
         viewModelFactory = Injection.provideViewModelFactory(this)
@@ -65,7 +67,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     }
                     if (unlockType == "") return@subscribe
 
-                    setupMediaPlayer()
+                    Log.d("alarmBug", "noise")
                     makeNoise()
 
                     when (unlockType) {
@@ -134,6 +136,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         if (alarm.vibrate) {
             vibrate()
         }
+        setupMediaPlayer()
         mediaPlayer.setOnPreparedListener {
             Toast.makeText(this, "prepared!", Toast.LENGTH_SHORT).show()
             mediaPlayer.start()
