@@ -6,15 +6,19 @@ import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.text.DateFormat
 import java.util.*
+import java.util.concurrent.Callable
 import kotlin.collections.ArrayList
 
 class AlarmSetupFragment: Fragment() {
@@ -162,7 +166,7 @@ class AlarmSetupFragment: Fragment() {
         view?.findViewById<Button>(R.id.alarm_setup_delete_button)?.apply {
             visibility = Button.VISIBLE
             setOnClickListener {
-                if (alarm.aid != null) createConfirmDeletionDialog(alarm.aid!!)
+                createConfirmDeletionDialog(alarm.aid)
             }
         }
     }
@@ -177,9 +181,7 @@ class AlarmSetupFragment: Fragment() {
         alarm.name = alarmNameView.text?.toString()!!
         alarm.vibrate = isAlarmVibratingView.isChecked
         alarm.isOn = true
-        if (alarm.aid != null) {
-            Utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
-        }
+        Utils.stopAlarm(alarm.aid, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
 
         createAlarm(alarm)
     }
@@ -202,10 +204,11 @@ class AlarmSetupFragment: Fragment() {
                     val allAlarms = ArrayList<Alarm>()
                     allAlarms.addAll(it)
 
-                    Flowable.just(Utils.createAlarmInDatabase(alarm, activity.disposable, activity.viewModel))
-                            .observeOn(AndroidSchedulers.mainThread())
+                    Observable.fromCallable { activity.viewModel.updateAlarm(alarm) }
                             .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
                             .subscribe {
+                                alarm.aid = it
                                 allAlarms.add(alarm)
                                 Utils.setAlarmWithDays(alarm, activity)
                                 Utils.updateAlarmNotification(allAlarms, activity)
@@ -214,7 +217,7 @@ class AlarmSetupFragment: Fragment() {
                 })
     }
 
-    private fun createConfirmDeletionDialog(id: Int) {
+    private fun createConfirmDeletionDialog(id: Long) {
         AlertDialog.Builder(activity).apply {
             setTitle("Delete alarm?")
             setPositiveButton("Yes") { dialog: DialogInterface, _: Int ->
@@ -230,7 +233,7 @@ class AlarmSetupFragment: Fragment() {
         }
     }
 
-    private fun deleteAlarm(id: Int) {
+    private fun deleteAlarm(id: Long) {
         activity.disposable.add(activity.viewModel.deleteAlarm(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

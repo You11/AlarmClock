@@ -15,10 +15,9 @@ class AlarmReceiver: BroadcastReceiver() {
 
         //passing alarm id to new activity
         val newIntent = Intent(context, ActivatedAlarmActivity::class.java)
+        val id = intent?.extras?.getInt("alarmId")
         newIntent.putExtra("alarmId", intent?.extras?.getInt("alarmId"))
         newIntent.flags = FLAG_ACTIVITY_NEW_TASK
         context.startActivity(newIntent)
-
-        Log.d("alarmTesting", "alarm started")
     }
 }

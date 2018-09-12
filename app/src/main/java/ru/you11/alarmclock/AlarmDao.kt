@@ -19,14 +19,14 @@ interface AlarmDao {
     fun getAlarm(id: Int): Single<Alarm>
 
     @Query("UPDATE alarmData SET isOn=:value WHERE aid=:id")
-    fun updateAlarmStatus(id: Int, value: Boolean)
+    fun updateAlarmStatus(id: Long, value: Boolean)
 
     @Insert(onConflict = REPLACE)
-    fun insert(alarm: Alarm)
+    fun insert(alarm: Alarm): Long
 
     @Query("DELETE from alarmData")
     fun deleteAll()
 
     @Query("DELETE from alarmData WHERE aid=:id")
-    fun deleteAlarm(id: Int)
+    fun deleteAlarm(id: Long)
 }

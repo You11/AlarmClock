@@ -167,7 +167,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
             if (isChecked) {
                 //turn on alarm
                 buttonView.isEnabled = false
-                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid!!, true)
+                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid, true)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
@@ -179,7 +179,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
             } else {
                 //turn off alarm
                 buttonView.isEnabled = false
-                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid!!, false)
+                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid, false)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {

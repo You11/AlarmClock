@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -16,13 +17,6 @@ object Utils {
 
     private const val ALARM_NOTIFICATION_ID = 100
     private const val NOTIFICATION_REQUEST_CODE = 101
-
-    fun createAlarmInDatabase(alarm: Alarm, disposable: CompositeDisposable, viewModel: AlarmViewModel) {
-        disposable.add(viewModel.updateAlarm(alarm)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe())
-    }
 
     //triggers when user presses delay button
     fun setDelayedAlarm(alarm: Alarm, context: Context) {
@@ -44,7 +38,7 @@ object Utils {
         val alarmIntent = setupAlarmIntent(alarm, context)
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
         val currentDate = Calendar.getInstance()
-        var earliestAlarm: Calendar = Calendar.getInstance()
+        var earliestAlarm = Calendar.getInstance()
         earliestAlarm.timeInMillis = Long.MAX_VALUE
 
         alarm.days.forEach {
@@ -68,12 +62,15 @@ object Utils {
             throw Exception("days weren't selected")
         }
 
-        Log.d("alarmTime", DateFormat.getTimeInstance(DateFormat.FULL).format(earliestAlarm.time))
-        Log.d("alarmDate", DateFormat.getDateInstance(DateFormat.FULL).format(earliestAlarm.time))
+        displayAlarmLogs(earliestAlarm, alarm)
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, earliestAlarm.timeInMillis, alarmIntent)
-        Log.d("alarmBug", "id: " + alarm.aid)
-        Log.d("alarmBug","alarm set: " + alarm.hours + ":" + alarm.minutes + ", name: " + alarm.name)
+    }
+
+    private fun displayAlarmLogs(earliestAlarm: Calendar, alarm: Alarm) {
+        Log.d("alarmTime", DateFormat.getTimeInstance(DateFormat.FULL).format(earliestAlarm.time))
+        Log.d("alarmDate", DateFormat.getDateInstance(DateFormat.FULL).format(earliestAlarm.time))
+        Log.d("alarmBug", "alarm set: " + alarm.hours + ":" + alarm.minutes + ", name: " + alarm.name)
         alarm.unlockType.forEach {
             if (it.value) {
                 Log.d("alarmBug", "unlock type: " + it.key)
@@ -82,8 +79,8 @@ object Utils {
     }
 
     //stops alarms with given id
-    fun stopAlarm(id: Int, alarmManager: AlarmManager, context: Context) {
-        val alarmIntent = PendingIntent.getBroadcast(context, id, Intent(context, AlarmReceiver::class.java), 0)
+    fun stopAlarm(id: Long, alarmManager: AlarmManager, context: Context) {
+        val alarmIntent = PendingIntent.getBroadcast(context, id.toInt(), Intent(context, AlarmReceiver::class.java), 0)
         alarmManager.cancel(alarmIntent)
     }
 
@@ -167,8 +164,8 @@ object Utils {
 
     private fun setupAlarmIntent(alarm: Alarm, context: Context): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java)
-        intent.putExtra("alarmId", alarm.aid)
-        return PendingIntent.getBroadcast(context, alarm.aid!!, intent, 0)
+        intent.putExtra("alarmId", alarm.aid.toInt())
+        return PendingIntent.getBroadcast(context, alarm.aid.toInt(), intent, 0)
     }
 
     private fun setupNotification(context: Context, alarm: Alarm): NotificationCompat.Builder {

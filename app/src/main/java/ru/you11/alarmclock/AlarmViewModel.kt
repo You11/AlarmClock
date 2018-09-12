@@ -16,14 +16,12 @@ class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
         return dataSource.getAlarm(id)
     }
 
-    fun updateAlarm(alarm: Alarm): Completable {
-        return Completable.fromAction {
-            dataSource.insert(alarm)
-        }
+    fun updateAlarm(alarm: Alarm): Long {
+        return dataSource.insert(alarm)
     }
 
     //TODO: should i keep this?
-    fun updateAlarmStatus(id: Int, value: Boolean): Completable {
+    fun updateAlarmStatus(id: Long, value: Boolean): Completable {
         return Completable.fromAction {
             dataSource.updateAlarmStatus(id, value)
         }
@@ -35,7 +33,7 @@ class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
         }
     }
 
-    fun deleteAlarm(id: Int): Completable {
+    fun deleteAlarm(id: Long): Completable {
         return Completable.fromAction {
             dataSource.deleteAlarm(id)
         }
