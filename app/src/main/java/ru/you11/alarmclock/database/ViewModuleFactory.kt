@@ -1,4 +1,4 @@
-package ru.you11.alarmclock
+package ru.you11.alarmclock.database
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider

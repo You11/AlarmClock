@@ -4,12 +4,10 @@ import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.v4.app.NotificationCompat
-import android.support.v4.app.NotificationManagerCompat
-import android.view.Menu
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
+import ru.you11.alarmclock.database.AlarmViewModel
+import ru.you11.alarmclock.database.Injection
+import ru.you11.alarmclock.database.ViewModuleFactory
 
 class MainActivity : AppCompatActivity() {
 

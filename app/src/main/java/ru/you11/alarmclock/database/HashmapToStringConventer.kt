@@ -1,9 +1,9 @@
-package ru.you11.alarmclock
+package ru.you11.alarmclock.database
 
 import android.arch.persistence.room.TypeConverter
 import kotlin.collections.HashMap
 
-class HashmapStringToBooleanConventer {
+class HashmapToStringConventer {
 
     @TypeConverter
     fun fromToHashMap(hashMap: HashMap<String, Boolean>): String {

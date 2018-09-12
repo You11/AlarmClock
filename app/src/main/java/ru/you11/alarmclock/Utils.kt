@@ -6,10 +6,6 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import io.reactivex.Flowable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import java.text.DateFormat
 import java.util.*
 
@@ -21,7 +17,7 @@ object Utils {
     //triggers when user presses delay button
     fun setDelayedAlarm(alarm: Alarm, context: Context) {
 
-        val alarmIntent = setupAlarmIntent(alarm, context)
+        val alarmIntent = setupAlarmIntent(alarm.aid * 10, context)
 
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
         val calendar = Calendar.getInstance()
@@ -35,47 +31,33 @@ object Utils {
     }
 
     fun setAlarmWithDays(alarm: Alarm, context: Context) {
-        val alarmIntent = setupAlarmIntent(alarm, context)
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-        val currentDate = Calendar.getInstance()
-        var earliestAlarm = Calendar.getInstance()
-        earliestAlarm.timeInMillis = Long.MAX_VALUE
+        Log.d("alarmId", alarm.aid.toString())
 
+        val currentDate = Calendar.getInstance()
         alarm.days.forEach {
             if (it.value) {
+                val alarmIntent = setupAlarmIntent(alarm.aid * 10 + alarm.daysStringToCalendar[it.key]!!, context)
                 val alarmDate = Calendar.getInstance()
                 alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
                 alarmDate.set(Calendar.MINUTE, alarm.minutes)
                 alarmDate.set(Calendar.SECOND, 0)
+                alarmDate.set(Calendar.MILLISECOND, 0)
                 alarmDate.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
                 if (alarmDate.before(currentDate)) {
                     alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
                 }
 
-                if (alarmDate.before(earliestAlarm)) {
-                    earliestAlarm = alarmDate
-                }
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmDate.timeInMillis, AlarmManager.INTERVAL_DAY * 7, alarmIntent)
+
+                displayAlarmLogs(alarmDate)
             }
         }
-
-        if (earliestAlarm.timeInMillis == Long.MAX_VALUE) {
-            throw Exception("days weren't selected")
-        }
-
-        displayAlarmLogs(earliestAlarm, alarm)
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, earliestAlarm.timeInMillis, alarmIntent)
     }
 
-    private fun displayAlarmLogs(earliestAlarm: Calendar, alarm: Alarm) {
-        Log.d("alarmTime", DateFormat.getTimeInstance(DateFormat.FULL).format(earliestAlarm.time))
-        Log.d("alarmDate", DateFormat.getDateInstance(DateFormat.FULL).format(earliestAlarm.time))
-        Log.d("alarmBug", "alarm set: " + alarm.hours + ":" + alarm.minutes + ", name: " + alarm.name)
-        alarm.unlockType.forEach {
-            if (it.value) {
-                Log.d("alarmBug", "unlock type: " + it.key)
-            }
-        }
+    private fun displayAlarmLogs(alarmDate: Calendar) {
+        Log.d("alarmTime", DateFormat.getTimeInstance(DateFormat.FULL).format(alarmDate.time))
+        Log.d("alarmDate", DateFormat.getDateInstance(DateFormat.FULL).format(alarmDate.time))
     }
 
     //stops alarms with given id
@@ -162,15 +144,17 @@ object Utils {
         return earliestAlarm
     }
 
-    private fun setupAlarmIntent(alarm: Alarm, context: Context): PendingIntent {
+    private fun setupAlarmIntent(id: Long, context: Context): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java)
-        intent.putExtra("alarmId", alarm.aid.toInt())
-        return PendingIntent.getBroadcast(context, alarm.aid.toInt(), intent, 0)
+        intent.putExtra("alarmId", id)
+        Log.d("alarmId", id.toString())
+        return PendingIntent.getBroadcast(context, id.toInt(), intent, 0)
     }
 
     private fun setupNotification(context: Context, alarm: Alarm): NotificationCompat.Builder {
         val notification = NotificationCompat.Builder(context, "100")
         notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
+        notification.setOnlyAlertOnce(true)
         if (alarm.name.isBlank()) {
             notification.setContentTitle("Alarm")
         } else {

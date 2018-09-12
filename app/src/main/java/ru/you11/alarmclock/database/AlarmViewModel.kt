@@ -1,10 +1,10 @@
-package ru.you11.alarmclock
+package ru.you11.alarmclock.database
 
 import android.arch.lifecycle.ViewModel
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
-import io.reactivex.internal.operators.completable.CompletableFromAction
+import ru.you11.alarmclock.Alarm
 
 class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
 
@@ -12,7 +12,7 @@ class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
         return dataSource.getAll()
     }
 
-    fun getAlarm(id: Int): Single<Alarm> {
+    fun getAlarm(id: Long): Single<Alarm> {
         return dataSource.getAlarm(id)
     }
 

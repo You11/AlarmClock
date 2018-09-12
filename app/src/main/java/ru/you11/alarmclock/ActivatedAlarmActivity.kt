@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.preference.PreferenceManager
-import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
@@ -26,6 +25,9 @@ import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import ru.you11.alarmclock.database.AlarmViewModel
+import ru.you11.alarmclock.database.Injection
+import ru.you11.alarmclock.database.ViewModuleFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -44,21 +46,21 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d("alarmBug", "onCreateLaunched")
         wakeUpDevice()
 
         viewModelFactory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
-        val alarmId = intent.extras.getInt("alarmId")
+        updateNotification()
+
+        val alarmId = intent.extras.getLong("alarmId") / 10
 
         disposable.add(viewModel.getAlarm(alarmId)
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { alarm ->
                     this.alarm = alarm
-                    setupNewAlarm()
 
                     var unlockType = ""
                     alarm.unlockType.forEach {
@@ -106,13 +108,12 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun setupNewAlarm() {
+    private fun updateNotification() {
         //TODO: gets called when delay button pressed too
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { allAlarms ->
-                    Utils.setAlarmWithDays(alarm, this@ActivatedAlarmActivity)
                     Utils.updateAlarmNotification(allAlarms, this@ActivatedAlarmActivity)
                 })
     }
@@ -157,9 +158,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private fun setupDelayButton() {
         findViewById<Button>(R.id.activated_alarm_delay_button).apply {
             setOnClickListener { _ ->
-
                 this.isEnabled = false
-
                 delayAlarm()
             }
         }

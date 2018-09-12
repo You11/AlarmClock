@@ -4,12 +4,13 @@ import android.arch.persistence.room.*
 import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
+import ru.you11.alarmclock.database.HashmapToStringConventer
 import java.util.*
 import kotlin.collections.HashMap
 
 @Parcelize
 @Entity(tableName = "alarmData")
-@TypeConverters(HashmapStringToBooleanConventer::class)
+@TypeConverters(HashmapToStringConventer::class)
 data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
                  @ColumnInfo(name = "name") var name: String = "",
                  @ColumnInfo(name = "hours") var hours: Int = -1,

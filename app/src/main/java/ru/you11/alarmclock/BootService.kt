@@ -1,15 +1,11 @@
 package ru.you11.alarmclock
 
-import android.app.IntentService
-import android.app.job.JobScheduler
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.JobIntentService
-import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import ru.you11.alarmclock.database.AlarmDatabase
 
 class BootService: JobIntentService() {
 

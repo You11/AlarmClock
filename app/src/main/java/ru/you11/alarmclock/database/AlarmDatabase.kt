@@ -1,9 +1,10 @@
-package ru.you11.alarmclock
+package ru.you11.alarmclock.database
 
 import android.arch.persistence.room.Database
 import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
+import ru.you11.alarmclock.Alarm
 
 @Database(entities = [(Alarm::class)], version = 1)
 abstract class AlarmDatabase: RoomDatabase() {
