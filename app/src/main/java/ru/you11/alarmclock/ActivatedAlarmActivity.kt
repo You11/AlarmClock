@@ -109,7 +109,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun updateNotification() {
-        //TODO: gets called when delay button pressed too
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

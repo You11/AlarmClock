@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
+import com.crashlytics.android.Crashlytics
 import io.reactivex.disposables.CompositeDisposable
 import ru.you11.alarmclock.database.AlarmViewModel
 import ru.you11.alarmclock.database.Injection

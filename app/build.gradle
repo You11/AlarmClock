@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 apply plugin: 'kotlin-android'
 
@@ -41,8 +42,12 @@ dependencies {
     implementation "android.arch.persistence.room:rxjava2:$room_version"
     implementation "android.arch.lifecycle:extensions:$room_version"
     implementation "android.arch.lifecycle:viewmodel:$room_version"
+    implementation 'com.google.firebase:firebase-core:16.0.3'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
     kapt "android.arch.persistence.room:compiler:$room_version"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
+apply plugin: 'com.google.gms.google-services'
