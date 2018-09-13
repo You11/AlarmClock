@@ -1,9 +1,13 @@
 package ru.you11.alarmclock
 
 import android.app.*
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -11,24 +15,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import io.reactivex.Completable
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.text.DateFormat
 import java.util.*
-import java.util.concurrent.Callable
 import kotlin.collections.ArrayList
 
 class AlarmSetupFragment: Fragment() {
 
+    private val RINGTONE_ACTIVITY_REQUEST_CODE = 200
     private lateinit var activity: MainActivity
     private var alarm = Alarm()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity = this.getActivity() as MainActivity
-
         return inflater.inflate(R.layout.fragment_alarm_setup, container, false)
     }
 
@@ -36,11 +37,11 @@ class AlarmSetupFragment: Fragment() {
         super.onResume()
         if (arguments != null && arguments?.getParcelable<Alarm>("alarm") != null) {
             setupOnEdit()
-        } else {
-            setupTimePicker(editTime = null)
         }
 
-        setupAlarmCancelButton()
+        setupTimePicker()
+        setupUnlockTypeButton()
+        setupRingtoneButton()
         setupDays()
         setupSaveButton()
     }
@@ -51,18 +52,19 @@ class AlarmSetupFragment: Fragment() {
             text = alarm.name
         }
 
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
-        calendar.set(Calendar.MINUTE, alarm.minutes)
-        setupTimePicker(calendar)
         setupVibrateCheckbox()
         setupDeleteButton()
     }
 
-    private fun setupTimePicker(editTime: Calendar?) {
+    private fun setupTimePicker() {
         view?.findViewById<TextView>(R.id.alarm_setup_time)?.apply {
 
-            val time: Calendar = editTime ?: Calendar.getInstance()
+            val time = Calendar.getInstance()
+
+            if (alarm.hours != -1 && alarm.minutes != -1) {
+                time.set(Calendar.HOUR_OF_DAY, alarm.hours)
+                time.set(Calendar.MINUTE, alarm.minutes)
+            }
 
             text = DateFormat.getTimeInstance(DateFormat.SHORT).format(time.time)
             alarm.hours = time.get(Calendar.HOUR_OF_DAY)
@@ -89,7 +91,7 @@ class AlarmSetupFragment: Fragment() {
         }
     }
 
-    private fun setupAlarmCancelButton() {
+    private fun setupUnlockTypeButton() {
         view?.findViewById<TextView>(R.id.alarm_setup_unlock_type)?.apply {
             setOnClickListener {
 
@@ -117,6 +119,32 @@ class AlarmSetupFragment: Fragment() {
                 }
                 dialog.create()
                 dialog.show()
+            }
+        }
+    }
+
+    private fun setupRingtoneButton() {
+        view?.findViewById<TextView>(R.id.alarm_setup_ringtone_button)?.apply {
+            setOnClickListener {
+                val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Set ringtone for alarm:")
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(alarm.ringtone))
+                startActivityForResult(intent, RINGTONE_ACTIVITY_REQUEST_CODE)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RINGTONE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                val uri = data?.extras?.get(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                alarm.ringtone = uri.toString()
+                Log.d("alarmRingtoneOnResult", alarm.ringtone)
             }
         }
     }
@@ -172,7 +200,6 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun saveAlarm() {
-
         val alarmNameView = view?.findViewById<EditText>(R.id.alarm_setup_name) ?: throw Exception("Name view is null")
         val alarmTimeView = view?.findViewById<TextView>(R.id.alarm_setup_time) ?: throw Exception("Time view is null")
         val isAlarmVibratingView = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox) ?: throw Exception("Checkbox view is null")
@@ -203,6 +230,7 @@ class AlarmSetupFragment: Fragment() {
 
                     val allAlarms = ArrayList<Alarm>()
                     allAlarms.addAll(it)
+                    Log.d("alarmRingtoneCreate", alarm.ringtone)
 
                     Observable.fromCallable { activity.viewModel.updateAlarm(alarm) }
                             .subscribeOn(Schedulers.io())
@@ -248,5 +276,18 @@ class AlarmSetupFragment: Fragment() {
                                 fragmentManager?.popBackStack()
                             })
                 })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            putParcelable("alarm", alarm)
+        }
+
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        alarm = savedInstanceState?.getParcelable("alarm") ?: Alarm(ringtone = RingtoneManager.getActualDefaultRingtoneUri(activity.applicationContext, RingtoneManager.TYPE_RINGTONE).toString())
     }
 }

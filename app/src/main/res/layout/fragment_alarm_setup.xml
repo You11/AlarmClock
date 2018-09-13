@@ -50,6 +50,13 @@
             android:id="@+id/alarm_setup_unlock_type"
             android:textSize="18sp"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Рингтон"
+            android:id="@+id/alarm_setup_ringtone_button"
+            android:textSize="18sp"/>
+
         <LinearLayout
             android:paddingTop="10dp"
             android:layout_width="match_parent"

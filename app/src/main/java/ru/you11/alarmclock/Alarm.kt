@@ -1,6 +1,7 @@
 package ru.you11.alarmclock
 
 import android.arch.persistence.room.*
+import android.net.Uri
 import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -23,6 +24,7 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
                          "friday" to true,
                          "saturday" to false,
                          "sunday" to false),
+                 @ColumnInfo(name = "ringtone") var ringtone: String? = null,
                  @ColumnInfo(name = "unlockType") var unlockType: HashMap<String, Boolean> = hashMapOf("buttonPress" to true,
                          "buttonHold" to false,
                          "shakeDevice" to false

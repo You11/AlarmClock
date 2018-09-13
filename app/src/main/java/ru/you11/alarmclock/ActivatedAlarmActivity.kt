@@ -9,6 +9,7 @@ import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -61,6 +62,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { alarm ->
                     this.alarm = alarm
+                    Log.d("alarmRingtonePassed", alarm.ringtone)
 
                     var unlockType = ""
                     alarm.unlockType.forEach {
@@ -69,7 +71,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     }
                     if (unlockType == "") return@subscribe
 
-                    Log.d("alarmBug", "noise")
                     makeNoise()
 
                     when (unlockType) {
@@ -127,8 +128,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     .build()
             mediaPlayer.setAudioAttributes(attributes)
         }
-        val url = "https://d1u5p3l4wpay3k.cloudfront.net/dota2_gamepedia/5/58/Pain_pain_17.mp3"
-        mediaPlayer.setDataSource(url)
+
+        mediaPlayer.setDataSource(this, Uri.parse(alarm.ringtone))
         mediaPlayer.prepareAsync()
     }
 
@@ -138,7 +139,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
         setupMediaPlayer()
         mediaPlayer.setOnPreparedListener {
-            Toast.makeText(this, "prepared!", Toast.LENGTH_SHORT).show()
             mediaPlayer.start()
         }
     }
@@ -167,7 +167,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         val delayTime = getDelayAlarmTime()
         updateAlarmTime(alarm, delayTime)
         Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
-        Toast.makeText(this@ActivatedAlarmActivity, "Delayed", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@ActivatedAlarmActivity, "Delayed for $delayTime minutes", Toast.LENGTH_SHORT).show()
         finish()
     }
 
@@ -263,7 +263,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun changeTextInShakeDialog() {
         findViewById<TextView>(R.id.activated_alarm_shake_text).apply {
-            text = "Shake device " + amountOfShakeTimes.toString() + " times"
+            text = "Shake device $amountOfShakeTimes times"
         }
     }
 }
