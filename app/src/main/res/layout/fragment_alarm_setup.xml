@@ -9,53 +9,110 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <EditText
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/alarm_setup_name"
-            android:hint="name or whatever"
+            android:orientation="vertical"
             android:paddingBottom="10dp"
-            android:textSize="18sp"/>
+            android:id="@+id/alarm_setup_time">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/alarm_setup_time"
-            android:paddingBottom="10dp"
-            android:textSize="18sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Время"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/alarm_setup_time_summary"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <View style="@style/Divider"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Вибрация"
-                android:textSize="18sp"/>
+                android:textSize="16sp"
+                android:layout_centerVertical="true"/>
 
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
-                android:id="@+id/alarm_setup_vibrate_checkbox" />
+                android:id="@+id/alarm_setup_vibrate_checkbox"
+                android:layout_centerVertical="true"/>
 
         </RelativeLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Метод выключения"
-            android:id="@+id/alarm_setup_unlock_type"
-            android:textSize="18sp"/>
+        <View style="@style/Divider"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Рингтон"
+            android:orientation="vertical"
+            android:id="@+id/alarm_setup_unlock_type"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Метод выключения"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/alarm_setup_unlock_type_summary"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <View style="@style/Divider"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:id="@+id/alarm_setup_ringtone_button"
-            android:textSize="18sp"/>
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Рингтон"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/alarm_setup_ringtone_summary"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <View style="@style/Divider"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/alarm_setup_name"
+            android:hint="Name of your alarm"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textSize="16sp"
+            android:background="@android:color/transparent"/>
+
+        <View style="@style/Divider"/>
 
         <LinearLayout
             android:paddingTop="10dp"

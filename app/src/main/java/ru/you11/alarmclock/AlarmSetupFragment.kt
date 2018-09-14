@@ -10,7 +10,6 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,7 +56,7 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun setupTimePicker() {
-        view?.findViewById<TextView>(R.id.alarm_setup_time)?.apply {
+        view?.findViewById<LinearLayout>(R.id.alarm_setup_time)?.apply {
 
             val time = Calendar.getInstance()
 
@@ -66,7 +65,7 @@ class AlarmSetupFragment: Fragment() {
                 time.set(Calendar.MINUTE, alarm.minutes)
             }
 
-            text = DateFormat.getTimeInstance(DateFormat.SHORT).format(time.time)
+            setSummaryForTime(time)
             alarm.hours = time.get(Calendar.HOUR_OF_DAY)
             alarm.minutes = time.get(Calendar.MINUTE)
 
@@ -78,7 +77,7 @@ class AlarmSetupFragment: Fragment() {
 
                     time.set(Calendar.HOUR_OF_DAY, hourOfDay)
                     time.set(Calendar.MINUTE, minute)
-                    text = DateFormat.getTimeInstance(DateFormat.SHORT).format(time.time)
+                    setSummaryForTime(time)
                 }
 
                 val dialog = TimePickerDialog(activity,
@@ -92,7 +91,8 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun setupUnlockTypeButton() {
-        view?.findViewById<TextView>(R.id.alarm_setup_unlock_type)?.apply {
+        setSummaryForUnlockType("Button press")
+        view?.findViewById<LinearLayout>(R.id.alarm_setup_unlock_type)?.apply {
             setOnClickListener {
 
                 val methods = arrayOf("Press button", "Hold button", "Shake device")
@@ -107,14 +107,23 @@ class AlarmSetupFragment: Fragment() {
                     when (which) {
                         0 -> {
                             alarm.unlockType["buttonPress"] = true
+                            setSummaryForUnlockType("Button press")
                         }
 
                         1 -> {
                             alarm.unlockType["buttonHold"] = true
-
+                            setSummaryForUnlockType("Button hold")
                         }
 
-                        2 -> alarm.unlockType["shakeDevice"] = true
+                        2 -> {
+                            alarm.unlockType["shakeDevice"] = true
+                            setSummaryForUnlockType("Shake device")
+                        }
+
+                        else -> {
+                            alarm.unlockType["buttonPress"] = true
+                            setSummaryForUnlockType("Button press")
+                        }
                     }
                 }
                 dialog.create()
@@ -124,7 +133,7 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun setupRingtoneButton() {
-        view?.findViewById<TextView>(R.id.alarm_setup_ringtone_button)?.apply {
+        view?.findViewById<LinearLayout>(R.id.alarm_setup_ringtone_button)?.apply {
             setOnClickListener {
                 val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Set ringtone for alarm:")
@@ -142,9 +151,9 @@ class AlarmSetupFragment: Fragment() {
 
         if (requestCode == RINGTONE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                val uri = data?.extras?.get(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                val uri = data?.extras?.get(RingtoneManager.EXTRA_RINGTONE_PICKED_URI) as Uri
                 alarm.ringtone = uri.toString()
-                Log.d("alarmRingtoneOnResult", alarm.ringtone)
+                setSummaryForRingtone(uri)
             }
         }
     }
@@ -201,7 +210,7 @@ class AlarmSetupFragment: Fragment() {
 
     private fun saveAlarm() {
         val alarmNameView = view?.findViewById<EditText>(R.id.alarm_setup_name) ?: throw Exception("Name view is null")
-        val alarmTimeView = view?.findViewById<TextView>(R.id.alarm_setup_time) ?: throw Exception("Time view is null")
+        val alarmTimeView = view?.findViewById<TextView>(R.id.alarm_setup_time_summary) ?: throw Exception("Time view is null")
         val isAlarmVibratingView = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox) ?: throw Exception("Checkbox view is null")
         disableUI(alarmNameView, alarmTimeView, isAlarmVibratingView)
 
@@ -230,7 +239,6 @@ class AlarmSetupFragment: Fragment() {
 
                     val allAlarms = ArrayList<Alarm>()
                     allAlarms.addAll(it)
-                    Log.d("alarmRingtoneCreate", alarm.ringtone)
 
                     Observable.fromCallable { activity.viewModel.updateAlarm(alarm) }
                             .subscribeOn(Schedulers.io())
@@ -288,6 +296,19 @@ class AlarmSetupFragment: Fragment() {
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        alarm = savedInstanceState?.getParcelable("alarm") ?: Alarm(ringtone = RingtoneManager.getActualDefaultRingtoneUri(activity.applicationContext, RingtoneManager.TYPE_RINGTONE).toString())
+        alarm = savedInstanceState?.getParcelable("alarm") ?: Alarm(ringtone = RingtoneManager.getActualDefaultRingtoneUri(activity.applicationContext, RingtoneManager.TYPE_ALARM).toString())
+        setSummaryForRingtone(Uri.parse(alarm.ringtone))
+    }
+
+    private fun setSummaryForTime(calendar: Calendar) {
+        view?.findViewById<TextView>(R.id.alarm_setup_time_summary)?.text = DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time)
+    }
+
+    private fun setSummaryForUnlockType(text: String) {
+        view?.findViewById<TextView>(R.id.alarm_setup_unlock_type_summary)?.text = text
+    }
+
+    private fun setSummaryForRingtone(uri: Uri) {
+        view?.findViewById<TextView>(R.id.alarm_setup_ringtone_summary)?.text = RingtoneManager.getRingtone(activity, uri).getTitle(activity)
     }
 }

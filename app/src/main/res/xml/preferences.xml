@@ -6,5 +6,6 @@
         android:dialogTitle="@string/pref_alarm_delay_time_dialog_title"
         android:entries="@array/pref_alarm_delay_time"
         android:entryValues="@array/pref_alarm_delay_time_values"
-        android:defaultValue="@string/pref_alarm_delay_time_default" />
+        android:defaultValue="@string/pref_alarm_delay_time_default"
+        android:summary="%s"/>
 </PreferenceScreen>
