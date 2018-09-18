@@ -129,6 +129,11 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             mediaPlayer.setAudioAttributes(attributes)
         }
 
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val volume = prefs.getInt(resources.getString(R.string.pref_alarm_volume_value_key), 75).toFloat() / 100
+        Log.d("volume", volume.toString())
+
+        mediaPlayer.setVolume(volume, volume)
         mediaPlayer.setDataSource(this, Uri.parse(alarm.ringtone))
         mediaPlayer.prepareAsync()
     }
@@ -137,10 +142,13 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         if (alarm.vibrate) {
             vibrate()
         }
-        setupMediaPlayer()
-        mediaPlayer.setOnPreparedListener {
-            mediaPlayer.start()
-        }
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val playSoundInSilent = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(resources.getString(R.string.pref_alarm_volume_in_silent_key), false)
+        if (playSoundInSilent || audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL)
+            setupMediaPlayer()
+            mediaPlayer.setOnPreparedListener {
+                mediaPlayer.start()
+            }
     }
 
     private fun vibrate() {

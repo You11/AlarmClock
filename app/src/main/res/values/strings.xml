@@ -8,6 +8,12 @@
     <string name="pref_alarm_delay_time_title">Alarm delay time</string>
     <string name="pref_alarm_delay_time_dialog_title">Set alarm delay time</string>
 
+    <string name="pref_alarm_volume_value_key">pref_volume_value</string>
+    <string name="pref_alarm_volume_value_title">Set alarm volume</string>
+
+    <string name="pref_alarm_volume_in_silent_key">pref_volume_in_silent</string>
+    <string name="pref_alarm_volume_in_silent_title">Play sound in silent mode</string>
+
     <string-array name="pref_alarm_delay_time">
         <item>1 minute</item>
         <item>2 minutes</item>

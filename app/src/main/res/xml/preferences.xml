@@ -8,4 +8,13 @@
         android:entryValues="@array/pref_alarm_delay_time_values"
         android:defaultValue="@string/pref_alarm_delay_time_default"
         android:summary="%s"/>
+
+    <SeekBarPreference android:title="@string/pref_alarm_volume_value_title"
+        android:key="@string/pref_alarm_volume_value_key"
+        android:max="100"
+        android:defaultValue="75" />
+
+    <CheckBoxPreference android:title="@string/pref_alarm_volume_in_silent_title"
+        android:key="@string/pref_alarm_volume_in_silent_key"
+        android:defaultValue="true"/>
 </PreferenceScreen>
