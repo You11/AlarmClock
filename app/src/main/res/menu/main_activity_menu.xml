@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menu_activity_main_add"
         android:icon="@drawable/baseline_alarm_add_white_48"
-        android:title="Add"
+        android:title="@string/menu_add_alarm_button"
         app:showAsAction="always" />
 
     <item android:id="@+id/menu_activity_main_settings"
         android:icon="@drawable/baseline_settings_white_48"
-        android:title="Settings"
+        android:title="@string/menu_settings_button"
         app:showAsAction="always" />
 </menu>

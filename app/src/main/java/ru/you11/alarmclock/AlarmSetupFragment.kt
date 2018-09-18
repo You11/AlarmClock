@@ -100,28 +100,28 @@ class AlarmSetupFragment: Fragment() {
                 val dialog = AlertDialog.Builder(activity)
                 dialog.setTitle("Pick alarm cancel type")
                 dialog.setItems(methods) { _, which ->
-                    for (unlock in alarm.unlockType) {
+                    for (unlock in alarm.turnOffMode) {
                         unlock.setValue(false)
                     }
 
                     when (which) {
                         0 -> {
-                            alarm.unlockType["buttonPress"] = true
+                            alarm.turnOffMode["buttonPress"] = true
                             setSummaryForUnlockType("Button press")
                         }
 
                         1 -> {
-                            alarm.unlockType["buttonHold"] = true
+                            alarm.turnOffMode["buttonHold"] = true
                             setSummaryForUnlockType("Button hold")
                         }
 
                         2 -> {
-                            alarm.unlockType["shakeDevice"] = true
+                            alarm.turnOffMode["shakeDevice"] = true
                             setSummaryForUnlockType("Shake device")
                         }
 
                         else -> {
-                            alarm.unlockType["buttonPress"] = true
+                            alarm.turnOffMode["buttonPress"] = true
                             setSummaryForUnlockType("Button press")
                         }
                     }

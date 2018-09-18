@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <ListPreference
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.preference.ListPreference
         android:title="@string/pref_alarm_delay_time_title"
         android:key="@string/pref_alarm_delay_time_key"
         android:dialogTitle="@string/pref_alarm_delay_time_dialog_title"
@@ -9,12 +9,12 @@
         android:defaultValue="@string/pref_alarm_delay_time_default"
         android:summary="%s"/>
 
-    <SeekBarPreference android:title="@string/pref_alarm_volume_value_title"
+    <android.support.v7.preference.SeekBarPreference android:title="@string/pref_alarm_volume_value_title"
         android:key="@string/pref_alarm_volume_value_key"
         android:max="100"
         android:defaultValue="75" />
 
-    <CheckBoxPreference android:title="@string/pref_alarm_volume_in_silent_title"
+    <android.support.v7.preference.CheckBoxPreference android:title="@string/pref_alarm_volume_in_silent_title"
         android:key="@string/pref_alarm_volume_in_silent_key"
         android:defaultValue="true"/>
-</PreferenceScreen>
+</android.support.v7.preference.PreferenceScreen>

@@ -19,7 +19,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Время"
+                android:text="@string/alarm_setup_time_text_view"
                 android:textSize="16sp"/>
 
             <TextView
@@ -40,7 +40,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Вибрация"
+                android:text="@string/alarm_setup_vibrate_text_view"
                 android:textSize="16sp"
                 android:layout_centerVertical="true"/>
 
@@ -67,7 +67,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Метод выключения"
+                android:text="@string/alarm_setup_turn_off_mode_text_view"
                 android:textSize="16sp"/>
 
             <TextView
@@ -90,7 +90,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Рингтон"
+                android:text="@string/alarm_setup_ringtone_text_view"
                 android:textSize="16sp"/>
 
             <TextView
@@ -106,11 +106,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/alarm_setup_name"
-            android:hint="Name of your alarm"
+            android:hint="@string/alarm_setup_name_hint_edit_text"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:textSize="16sp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:lines="1"
+            android:inputType="text"/>
 
         <View style="@style/Divider"/>
 
@@ -127,7 +129,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_monday"
                 android:gravity="center"
-                android:text="ПН"/>
+                android:text="@string/alarm_setup_days_monday_text_view" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -135,7 +137,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_tuesday"
                 android:gravity="center"
-                android:text="ВТ"/>
+                android:text="@string/alarm_setup_days_tuesday_text_view"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -143,7 +145,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_wednesday"
                 android:gravity="center"
-                android:text="СР"/>
+                android:text="@string/alarm_setup_days_wednesday_text_view"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -151,7 +153,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_thursday"
                 android:gravity="center"
-                android:text="ЧТ"/>
+                android:text="@string/alarm_setup_days_thirsday_text_view"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -159,7 +161,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_friday"
                 android:gravity="center"
-                android:text="ПТ"/>
+                android:text="@string/alarm_setup_days_friday_text_view"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -167,7 +169,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_saturday"
                 android:gravity="center"
-                android:text="СБ"/>
+                android:text="@string/alarm_setup_days_saturday_text_view"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -175,7 +177,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_sunday"
                 android:gravity="center"
-                android:text="ВС"/>
+                android:text="@string/alarm_setup_days_sunday_text_view"/>
         </LinearLayout>
 
         <LinearLayout
@@ -187,14 +189,14 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="save"
+                android:text="@string/alarm_setup_save_button"
                 android:id="@+id/alarm_setup_save_button"
                 style="?android:buttonBarButtonStyle"/>
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="delete"
+                android:text="@string/alarm_setup_delete_button"
                 android:visibility="gone"
                 android:id="@+id/alarm_setup_delete_button"
                 style="?android:buttonBarButtonStyle"/>

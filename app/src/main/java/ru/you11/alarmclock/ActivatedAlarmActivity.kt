@@ -62,18 +62,17 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { alarm ->
                     this.alarm = alarm
-                    Log.d("alarmRingtonePassed", alarm.ringtone)
 
-                    var unlockType = ""
-                    alarm.unlockType.forEach {
+                    var turnOffMode = ""
+                    alarm.turnOffMode.forEach {
                         if (it.value)
-                            unlockType = it.key
+                            turnOffMode = it.key
                     }
-                    if (unlockType == "") return@subscribe
+                    if (turnOffMode == "") return@subscribe
 
                     makeNoise()
 
-                    when (unlockType) {
+                    when (turnOffMode) {
                         "buttonPress" -> {
                             setContentView(R.layout.activity_activated_alarm_press)
                             setupDelayButton()
@@ -131,7 +130,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val volume = prefs.getInt(resources.getString(R.string.pref_alarm_volume_value_key), 75).toFloat() / 100
-        Log.d("volume", volume.toString())
 
         mediaPlayer.setVolume(volume, volume)
         mediaPlayer.setDataSource(this, Uri.parse(alarm.ringtone))
@@ -175,7 +173,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         val delayTime = getDelayAlarmTime()
         updateAlarmTime(alarm, delayTime)
         Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
-        Toast.makeText(this@ActivatedAlarmActivity, "Delayed for $delayTime minutes", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@ActivatedAlarmActivity, resources.getString(R.string.activated_alarm_delay_toast, delayTime), Toast.LENGTH_SHORT).show()
         finish()
     }
 
@@ -208,7 +206,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     MotionEvent.ACTION_DOWN -> {
                         Completable.timer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                                 .subscribe {
-                                    Toast.makeText(this@ActivatedAlarmActivity, "Turn off", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@ActivatedAlarmActivity, context.getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
                                     finish()
                                 }
                         true
@@ -271,7 +269,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun changeTextInShakeDialog() {
         findViewById<TextView>(R.id.activated_alarm_shake_text).apply {
-            text = "Shake device $amountOfShakeTimes times"
+            text = resources.getString(R.string.activated_alarm_shake_device_text, amountOfShakeTimes)
         }
     }
 }

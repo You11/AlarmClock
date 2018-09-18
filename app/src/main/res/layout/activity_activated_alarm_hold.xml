@@ -7,6 +7,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/activated_alarm_delay_button"
-        android:text="Remind Later"/>
+        android:text="@string/activated_alarm_delay_button"/>
 
 </android.support.constraint.ConstraintLayout>
