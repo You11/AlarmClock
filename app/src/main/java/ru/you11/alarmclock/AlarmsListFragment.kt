@@ -68,7 +68,7 @@ class AlarmsListFragment: Fragment() {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe {
                             for (alarm in it) {
-                                Utils.stopAlarm(alarm.aid!!, alarmManager, activity)
+                                Utils.stopAlarm(alarm.aid, alarmManager, activity)
                             }
 
                             Log.d("alarm", "alarms stopped")

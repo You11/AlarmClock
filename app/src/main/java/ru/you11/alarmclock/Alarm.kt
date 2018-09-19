@@ -1,7 +1,6 @@
 package ru.you11.alarmclock
 
 import android.arch.persistence.room.*
-import android.net.Uri
 import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -17,28 +16,38 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
                  @ColumnInfo(name = "hours") var hours: Int = -1,
                  @ColumnInfo(name = "minutes") var minutes: Int = -1,
                  @ColumnInfo(name = "isVibrate") var vibrate: Boolean = false,
-                 @ColumnInfo(name = "days") var days: HashMap<String, Boolean> = hashMapOf("monday" to true,
-                         "tuesday" to true,
-                         "wednesday" to true,
-                         "thursday" to true,
-                         "friday" to true,
-                         "saturday" to false,
-                         "sunday" to false),
+                 @ColumnInfo(name = "days") var days: HashMap<String, Boolean> = hashMapOf(MainApp.applicationContext().resources.getString(R.string.alarm_days_monday) to true,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_days_tuesday) to true,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_days_wednesday) to true,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_days_thursday) to true,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_days_friday) to true,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_days_saturday) to false,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_days_sunday) to false),
                  @ColumnInfo(name = "ringtone") var ringtone: String? = null,
-                 @ColumnInfo(name = "turnOffMode") var turnOffMode: HashMap<String, Boolean> = hashMapOf("buttonPress" to true,
-                         "buttonHold" to false,
-                         "shakeDevice" to false
+                 @ColumnInfo(name = "turnOffMode") var turnOffMode: HashMap<String, Boolean> = hashMapOf(
+                         MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_press_button) to true,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_hold_button) to false,
+                         MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_shake_device) to false
                  ),
                  @ColumnInfo(name = "isOn") var isOn: Boolean = false
 ): Parcelable {
 
-    @Ignore
-    @IgnoredOnParcel
-    val daysStringToCalendar = hashMapOf("monday" to Calendar.MONDAY,
-            "tuesday" to Calendar.TUESDAY,
-            "wednesday" to Calendar.WEDNESDAY,
-            "thursday" to Calendar.THURSDAY,
-            "friday" to Calendar.FRIDAY,
-            "saturday" to Calendar.SATURDAY,
-            "sunday" to Calendar.SUNDAY)
+    @Ignore @IgnoredOnParcel
+    val daysStringToCalendar = hashMapOf(MainApp.applicationContext().resources.getString(R.string.alarm_days_monday) to Calendar.MONDAY,
+            MainApp.applicationContext().resources.getString(R.string.alarm_days_tuesday) to Calendar.TUESDAY,
+            MainApp.applicationContext().resources.getString(R.string.alarm_days_wednesday) to Calendar.WEDNESDAY,
+            MainApp.applicationContext().resources.getString(R.string.alarm_days_thursday) to Calendar.THURSDAY,
+            MainApp.applicationContext().resources.getString(R.string.alarm_days_friday) to Calendar.FRIDAY,
+            MainApp.applicationContext().resources.getString(R.string.alarm_days_saturday) to Calendar.SATURDAY,
+            MainApp.applicationContext().resources.getString(R.string.alarm_days_sunday) to Calendar.SUNDAY)
+
+    @Ignore @IgnoredOnParcel
+    val TURN_OFF_MODE_BUTTON_PRESS = MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_press_button)
+
+    @Ignore @IgnoredOnParcel
+    val TURN_OFF_MODE_BUTTON_HOLD = MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_hold_button)
+
+    @Ignore @IgnoredOnParcel
+    val TURN_OFF_MODE_SHAKE_DEVICE = MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_shake_device)
+
 }

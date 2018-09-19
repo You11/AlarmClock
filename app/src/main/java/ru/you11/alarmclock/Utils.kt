@@ -32,7 +32,6 @@ object Utils {
 
     fun setAlarmWithDays(alarm: Alarm, context: Context) {
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-        Log.d("alarmId", alarm.aid.toString())
 
         val currentDate = Calendar.getInstance()
         alarm.days.forEach {
@@ -147,7 +146,6 @@ object Utils {
     private fun setupAlarmIntent(id: Long, context: Context): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("alarmId", id)
-        Log.d("alarmId", id.toString())
         return PendingIntent.getBroadcast(context, id.toInt(), intent, 0)
     }
 
@@ -156,7 +154,7 @@ object Utils {
         notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
         notification.setOnlyAlertOnce(true)
         if (alarm.name.isBlank()) {
-            notification.setContentTitle("Alarm")
+            notification.setContentTitle(context.resources.getString(R.string.notification_default_title))
         } else {
             notification.setContentTitle(alarm.name)
         }
@@ -165,11 +163,13 @@ object Utils {
 
         alarm.days.forEach {
             if (it.value) {
-                day = it.key
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
+                day = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
             }
         }
 
-        notification.setContentText(day + ", " + Utils.getAlarmTime(alarm.hours, alarm.minutes))
+        notification.setContentText(day + ", " + getAlarmTime(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
 

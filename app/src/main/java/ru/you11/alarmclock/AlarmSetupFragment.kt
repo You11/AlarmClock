@@ -91,14 +91,15 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun setupUnlockTypeButton() {
-        setSummaryForUnlockType("Button press")
+        setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode))
         view?.findViewById<LinearLayout>(R.id.alarm_setup_unlock_type)?.apply {
             setOnClickListener {
-
-                val methods = arrayOf("Press button", "Hold button", "Shake device")
+                val methods = arrayOf(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode),
+                        resources.getString(R.string.alarm_setup_turn_off_dialog_button_hold_mode),
+                        resources.getString(R.string.alarm_setup_turn_off_dialog_shake_device_mode))
 
                 val dialog = AlertDialog.Builder(activity)
-                dialog.setTitle("Pick alarm cancel type")
+                dialog.setTitle(resources.getString(R.string.alarm_setup_turn_off_dialog_title))
                 dialog.setItems(methods) { _, which ->
                     for (unlock in alarm.turnOffMode) {
                         unlock.setValue(false)
@@ -106,23 +107,23 @@ class AlarmSetupFragment: Fragment() {
 
                     when (which) {
                         0 -> {
-                            alarm.turnOffMode["buttonPress"] = true
-                            setSummaryForUnlockType("Button press")
+                            alarm.turnOffMode[alarm.TURN_OFF_MODE_BUTTON_PRESS] = true
+                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode))
                         }
 
                         1 -> {
-                            alarm.turnOffMode["buttonHold"] = true
-                            setSummaryForUnlockType("Button hold")
+                            alarm.turnOffMode[alarm.TURN_OFF_MODE_BUTTON_HOLD] = true
+                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_hold_mode))
                         }
 
                         2 -> {
-                            alarm.turnOffMode["shakeDevice"] = true
-                            setSummaryForUnlockType("Shake device")
+                            alarm.turnOffMode[alarm.TURN_OFF_MODE_SHAKE_DEVICE] = true
+                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_shake_device_mode))
                         }
 
                         else -> {
-                            alarm.turnOffMode["buttonPress"] = true
-                            setSummaryForUnlockType("Button press")
+                            alarm.turnOffMode[alarm.TURN_OFF_MODE_BUTTON_PRESS] = true
+                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode))
                         }
                     }
                 }
@@ -136,7 +137,7 @@ class AlarmSetupFragment: Fragment() {
         view?.findViewById<LinearLayout>(R.id.alarm_setup_ringtone_button)?.apply {
             setOnClickListener {
                 val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Set ringtone for alarm:")
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, resources.getString(R.string.alarm_setup_ringtone_dialog_title))
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
@@ -159,13 +160,13 @@ class AlarmSetupFragment: Fragment() {
     }
 
     private fun setupDays() {
-        val daysViews = hashMapOf<String, TextView>("monday" to view?.findViewById(R.id.alarm_setup_days_monday)!!,
-                "tuesday" to view?.findViewById(R.id.alarm_setup_days_tuesday)!!,
-                "wednesday" to view?.findViewById(R.id.alarm_setup_days_wednesday)!!,
-                "thursday" to view?.findViewById(R.id.alarm_setup_days_thursday)!!,
-                "friday" to view?.findViewById(R.id.alarm_setup_days_friday)!!,
-                "saturday" to view?.findViewById(R.id.alarm_setup_days_saturday)!!,
-                "sunday" to view?.findViewById(R.id.alarm_setup_days_sunday)!!)
+        val daysViews = hashMapOf<String, TextView>(resources.getString(R.string.alarm_days_monday) to view?.findViewById(R.id.alarm_setup_days_monday)!!,
+                resources.getString(R.string.alarm_days_tuesday) to view?.findViewById(R.id.alarm_setup_days_tuesday)!!,
+                resources.getString(R.string.alarm_days_wednesday) to view?.findViewById(R.id.alarm_setup_days_wednesday)!!,
+                resources.getString(R.string.alarm_days_thursday) to view?.findViewById(R.id.alarm_setup_days_thursday)!!,
+                resources.getString(R.string.alarm_days_friday) to view?.findViewById(R.id.alarm_setup_days_friday)!!,
+                resources.getString(R.string.alarm_days_saturday) to view?.findViewById(R.id.alarm_setup_days_saturday)!!,
+                resources.getString(R.string.alarm_days_sunday) to view?.findViewById(R.id.alarm_setup_days_sunday)!!)
 
 
         daysViews.forEach {
@@ -255,13 +256,13 @@ class AlarmSetupFragment: Fragment() {
 
     private fun createConfirmDeletionDialog(id: Long) {
         AlertDialog.Builder(activity).apply {
-            setTitle("Delete alarm?")
-            setPositiveButton("Yes") { dialog: DialogInterface, _: Int ->
+            setTitle(resources.getString(R.string.alarm_setup_delete_dialog_title))
+            setPositiveButton(resources.getString(R.string.confirm_button)) { dialog: DialogInterface, _: Int ->
                 deleteAlarm(id)
                 dialog.dismiss()
             }
 
-            setNegativeButton("No") { dialog: DialogInterface, _: Int ->
+            setNegativeButton(resources.getString(R.string.cancel_button)) { dialog: DialogInterface, _: Int ->
                 dialog.cancel()
             }
             create()
@@ -304,7 +305,7 @@ class AlarmSetupFragment: Fragment() {
         view?.findViewById<TextView>(R.id.alarm_setup_time_summary)?.text = DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time)
     }
 
-    private fun setSummaryForUnlockType(text: String) {
+    private fun setSummaryForTurnOffMode(text: String) {
         view?.findViewById<TextView>(R.id.alarm_setup_unlock_type_summary)?.text = text
     }
 

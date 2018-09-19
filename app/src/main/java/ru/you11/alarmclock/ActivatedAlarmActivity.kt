@@ -73,18 +73,18 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     makeNoise()
 
                     when (turnOffMode) {
-                        "buttonPress" -> {
+                        alarm.TURN_OFF_MODE_BUTTON_PRESS -> {
                             setContentView(R.layout.activity_activated_alarm_press)
                             setupDelayButton()
                             setupTurnOffButton()
                         }
 
-                        "buttonHold" -> {
+                        alarm.TURN_OFF_MODE_BUTTON_HOLD -> {
                             setContentView(R.layout.activity_activated_alarm_hold)
                             setupOnHoldTurnOffButton()
                         }
 
-                        "shakeDevice" -> {
+                        alarm.TURN_OFF_MODE_SHAKE_DEVICE -> {
                             setContentView(R.layout.activity_activated_alarm_shake)
                             setupShakeLayout()
                         }
@@ -153,11 +153,10 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         val pattern = longArrayOf(0, 1000, 1000)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0))
-            Log.d("vibration", "vibrated")
         } else {
             vibrator.vibrate(pattern, 0)
-            Log.d("vibration", "vibrated")
         }
+        Log.d("vibration", "vibrated")
     }
 
     private fun setupDelayButton() {

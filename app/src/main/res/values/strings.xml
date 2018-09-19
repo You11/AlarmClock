@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AlarmClock</string>
+    <string name="app_name" translatable="false">AlarmClock</string>
     <string name="add_alarm_button">Add</string>
     <string name="cancel_all_alarms_button">Cancel all</string>
     <string name="delete_all_alarms_button">Delete all</string>
@@ -10,29 +10,34 @@
         <item>3 minutes</item>
         <item>5 minutes</item>
     </string-array>
-    <string-array name="pref_alarm_delay_time_values">
+    <string-array name="pref_alarm_delay_time_values" translatable="false">
         <item>1</item>
         <item>2</item>
         <item>3</item>
         <item>5</item>
     </string-array>
-    <string name="pref_alarm_delay_time_key">pref_delay_time</string>
+    <string name="pref_alarm_delay_time_key" translatable="false">pref_delay_time</string>
     <string name="pref_alarm_delay_time_title">Alarm delay time</string>
     <string name="pref_alarm_delay_time_dialog_title">Set alarm delay time</string>
     <string name="pref_alarm_delay_time_default">1</string>
 
-    <string name="pref_alarm_volume_value_key">pref_volume_value</string>
+    <string name="pref_alarm_volume_value_key" translatable="false">pref_volume_value</string>
     <string name="pref_alarm_volume_value_title">Set alarm volume</string>
 
-    <string name="pref_alarm_volume_in_silent_key">pref_volume_in_silent</string>
+    <string name="pref_alarm_volume_in_silent_key" translatable="false">pref_volume_in_silent</string>
     <string name="pref_alarm_volume_in_silent_title">Play sound in silent mode</string>
     
     <string name="activated_alarm_delay_button">Later</string>
     <string name="activated_alarm_turn_off_button">Turn off</string>
-    
+
     <string name="alarm_setup_time_text_view">Time of alarm</string>
     <string name="alarm_setup_vibrate_text_view">Vibrate</string>
     <string name="alarm_setup_turn_off_mode_text_view">Turn off mode</string>
+    <string name="alarm_setup_turn_off_dialog_title">Pick alarm cancel type</string>
+    <string name="alarm_setup_turn_off_dialog_button_press_mode">Button press</string>
+    <string name="alarm_setup_turn_off_dialog_button_hold_mode">Button hold</string>
+    <string name="alarm_setup_turn_off_dialog_shake_device_mode">Shake device</string>
+    <string name="alarm_setup_ringtone_dialog_title">Set ringtone for alarm:</string>
     <string name="alarm_setup_ringtone_text_view">Ringtone</string>
     <string name="alarm_setup_name_hint_edit_text">Name of your alarm</string>
     <string name="alarm_setup_days_monday_text_view">MON</string>
@@ -44,6 +49,10 @@
     <string name="alarm_setup_days_sunday_text_view">SUN</string>
     <string name="alarm_setup_save_button">Save</string>
     <string name="alarm_setup_delete_button">Delete</string>
+    <string name="alarm_setup_delete_dialog_title">Delete alarm?</string>
+
+    <string name="confirm_button">Confirm</string>
+    <string name="cancel_button">Cancel</string>
     
     <string name="menu_add_alarm_button">Add</string>
     <string name="menu_settings_button">Settings</string>
@@ -57,4 +66,20 @@
         <item quantity="one">Shake device %d time</item>
         <item quantity="other">Shake device %d times</item>
     </plurals>
+
+    <string name="notification_default_title">Alarm</string>
+
+    <string name="activity_settings_title">Settings</string>
+
+    <string name="alarm_days_monday">monday</string>
+    <string name="alarm_days_tuesday">tuesday</string>
+    <string name="alarm_days_wednesday">wednesday</string>
+    <string name="alarm_days_thursday">thursday</string>
+    <string name="alarm_days_friday">friday</string>
+    <string name="alarm_days_saturday">saturday</string>
+    <string name="alarm_days_sunday">sunday</string>
+
+    <string name="alarm_turn_off_mode_press_button">buttonPress</string>
+    <string name="alarm_turn_off_mode_hold_button">buttonHold</string>
+    <string name="alarm_turn_off_mode_shake_device">shakeDevice</string>
 </resources>
