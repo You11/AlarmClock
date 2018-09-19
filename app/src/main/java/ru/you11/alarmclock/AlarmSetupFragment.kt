@@ -39,7 +39,7 @@ class AlarmSetupFragment: Fragment() {
         }
 
         setupTimePicker()
-        setupUnlockTypeButton()
+        setupTurnOffModeButton()
         setupRingtoneButton()
         setupDays()
         setupSaveButton()
@@ -90,40 +90,52 @@ class AlarmSetupFragment: Fragment() {
         }
     }
 
-    private fun setupUnlockTypeButton() {
-        setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode))
+    private fun setupTurnOffModeButton() {
+        val turnOffButtonPressDialogText = resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode)
+        val turnOffButtonHoldDialogText = resources.getString(R.string.alarm_setup_turn_off_dialog_button_hold_mode)
+        val turnOffShakeDeviceDialogText = resources.getString(R.string.alarm_setup_turn_off_dialog_shake_device_mode)
+
+        alarm.turnOffMode.forEach {
+            if (it.value) {
+                when (it.key) {
+                    alarm.TURN_OFF_MODE_BUTTON_PRESS -> setSummaryForTurnOffMode(turnOffButtonPressDialogText)
+                    alarm.TURN_OFF_MODE_BUTTON_HOLD -> setSummaryForTurnOffMode(turnOffButtonHoldDialogText)
+                    alarm.TURN_OFF_MODE_SHAKE_DEVICE -> setSummaryForTurnOffMode(turnOffShakeDeviceDialogText)
+                }
+            }
+        }
         view?.findViewById<LinearLayout>(R.id.alarm_setup_unlock_type)?.apply {
             setOnClickListener {
-                val methods = arrayOf(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode),
-                        resources.getString(R.string.alarm_setup_turn_off_dialog_button_hold_mode),
-                        resources.getString(R.string.alarm_setup_turn_off_dialog_shake_device_mode))
+                val methods = arrayOf(turnOffButtonPressDialogText,
+                        turnOffButtonHoldDialogText,
+                        turnOffShakeDeviceDialogText)
 
                 val dialog = AlertDialog.Builder(activity)
                 dialog.setTitle(resources.getString(R.string.alarm_setup_turn_off_dialog_title))
                 dialog.setItems(methods) { _, which ->
-                    for (unlock in alarm.turnOffMode) {
-                        unlock.setValue(false)
+                    for (mode in alarm.turnOffMode) {
+                        mode.setValue(false)
                     }
 
                     when (which) {
                         0 -> {
                             alarm.turnOffMode[alarm.TURN_OFF_MODE_BUTTON_PRESS] = true
-                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode))
+                            setSummaryForTurnOffMode(turnOffButtonPressDialogText)
                         }
 
                         1 -> {
                             alarm.turnOffMode[alarm.TURN_OFF_MODE_BUTTON_HOLD] = true
-                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_hold_mode))
+                            setSummaryForTurnOffMode(turnOffButtonHoldDialogText)
                         }
 
                         2 -> {
                             alarm.turnOffMode[alarm.TURN_OFF_MODE_SHAKE_DEVICE] = true
-                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_shake_device_mode))
+                            setSummaryForTurnOffMode(turnOffShakeDeviceDialogText)
                         }
 
                         else -> {
                             alarm.turnOffMode[alarm.TURN_OFF_MODE_BUTTON_PRESS] = true
-                            setSummaryForTurnOffMode(resources.getString(R.string.alarm_setup_turn_off_dialog_button_press_mode))
+                            setSummaryForTurnOffMode(turnOffButtonPressDialogText)
                         }
                     }
                 }

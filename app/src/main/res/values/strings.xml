@@ -33,7 +33,7 @@
     <string name="alarm_setup_time_text_view">Time of alarm</string>
     <string name="alarm_setup_vibrate_text_view">Vibrate</string>
     <string name="alarm_setup_turn_off_mode_text_view">Turn off mode</string>
-    <string name="alarm_setup_turn_off_dialog_title">Pick alarm cancel type</string>
+    <string name="alarm_setup_turn_off_dialog_title">Pick alarm cancel mode</string>
     <string name="alarm_setup_turn_off_dialog_button_press_mode">Button press</string>
     <string name="alarm_setup_turn_off_dialog_button_hold_mode">Button hold</string>
     <string name="alarm_setup_turn_off_dialog_shake_device_mode">Shake device</string>
