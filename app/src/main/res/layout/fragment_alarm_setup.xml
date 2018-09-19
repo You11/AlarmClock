@@ -153,7 +153,7 @@
                 android:layout_weight="1"
                 android:id="@+id/alarm_setup_days_thursday"
                 android:gravity="center"
-                android:text="@string/alarm_setup_days_thirsday_text_view"/>
+                android:text="@string/alarm_setup_days_thursday_text_view"/>
 
             <TextView
                 android:layout_width="wrap_content"

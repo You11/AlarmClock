@@ -38,7 +38,7 @@
     <string name="alarm_setup_days_monday_text_view">MON</string>
     <string name="alarm_setup_days_tuesday_text_view">TUE</string>
     <string name="alarm_setup_days_wednesday_text_view">WED</string>
-    <string name="alarm_setup_days_thirsday_text_view">THU</string>
+    <string name="alarm_setup_days_thursday_text_view">THU</string>
     <string name="alarm_setup_days_friday_text_view">FRI</string>
     <string name="alarm_setup_days_saturday_text_view">SAT</string>
     <string name="alarm_setup_days_sunday_text_view">SUN</string>
@@ -48,7 +48,13 @@
     <string name="menu_add_alarm_button">Add</string>
     <string name="menu_settings_button">Settings</string>
     
-    <string name="activated_alarm_delay_toast">Delayed for %1$d minutes</string>
+    <plurals name="activated_alarm_delay_toast">
+        <item quantity="one">Delayed for %d minute</item>
+        <item quantity="other">Delayed for %d minutes</item>
+    </plurals>
     <string name="activated_alarm_turn_off_toast">Turned off</string>
-    <string name="activated_alarm_shake_device_text">Shake device %1$d times</string>
+    <plurals name="activated_alarm_shake_device_text">
+        <item quantity="one">Shake device %d time</item>
+        <item quantity="other">Shake device %d times</item>
+    </plurals>
 </resources>

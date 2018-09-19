@@ -81,7 +81,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
                         "buttonHold" -> {
                             setContentView(R.layout.activity_activated_alarm_hold)
-                            setupOnPressTurnOffButton()
+                            setupOnHoldTurnOffButton()
                         }
 
                         "shakeDevice" -> {
@@ -173,7 +173,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         val delayTime = getDelayAlarmTime()
         updateAlarmTime(alarm, delayTime)
         Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
-        Toast.makeText(this@ActivatedAlarmActivity, resources.getString(R.string.activated_alarm_delay_toast, delayTime), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@ActivatedAlarmActivity, resources.getQuantityString(R.plurals.activated_alarm_delay_toast, delayTime, delayTime), Toast.LENGTH_SHORT).show()
         finish()
     }
 
@@ -199,7 +199,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun setupOnPressTurnOffButton() {
+    private fun setupOnHoldTurnOffButton() {
         findViewById<Button>(R.id.activated_alarm_delay_button).apply {
             setOnTouchListener { v, event ->
                 when (event.action) {
@@ -269,7 +269,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun changeTextInShakeDialog() {
         findViewById<TextView>(R.id.activated_alarm_shake_text).apply {
-            text = resources.getString(R.string.activated_alarm_shake_device_text, amountOfShakeTimes)
+            text = resources.getQuantityString(R.plurals.activated_alarm_shake_device_text, amountOfShakeTimes, amountOfShakeTimes)
         }
     }
 }
