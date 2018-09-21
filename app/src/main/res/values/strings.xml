@@ -29,6 +29,8 @@
     
     <string name="activated_alarm_delay_button">Later</string>
     <string name="activated_alarm_turn_off_button">Turn off</string>
+    <string name="activated_alarm_delay_or_turn_off_button">Later/Turn off</string>
+    <string name="activated_alarm_hold_button_tooltip">Hold button for %1$d seconds</string>
 
     <string name="alarm_setup_time_text_view">Time of alarm</string>
     <string name="alarm_setup_vibrate_text_view">Vibrate</string>
@@ -71,15 +73,15 @@
 
     <string name="activity_settings_title">Settings</string>
 
-    <string name="alarm_days_monday">monday</string>
-    <string name="alarm_days_tuesday">tuesday</string>
-    <string name="alarm_days_wednesday">wednesday</string>
-    <string name="alarm_days_thursday">thursday</string>
-    <string name="alarm_days_friday">friday</string>
-    <string name="alarm_days_saturday">saturday</string>
-    <string name="alarm_days_sunday">sunday</string>
+    <string name="alarm_days_monday" translatable="false">monday</string>
+    <string name="alarm_days_tuesday" translatable="false">tuesday</string>
+    <string name="alarm_days_wednesday" translatable="false">wednesday</string>
+    <string name="alarm_days_thursday" translatable="false">thursday</string>
+    <string name="alarm_days_friday" translatable="false">friday</string>
+    <string name="alarm_days_saturday" translatable="false">saturday</string>
+    <string name="alarm_days_sunday" translatable="false">sunday</string>
 
-    <string name="alarm_turn_off_mode_press_button">buttonPress</string>
-    <string name="alarm_turn_off_mode_hold_button">buttonHold</string>
-    <string name="alarm_turn_off_mode_shake_device">shakeDevice</string>
+    <string name="alarm_turn_off_mode_press_button" translatable="false">buttonPress</string>
+    <string name="alarm_turn_off_mode_hold_button" translatable="false">buttonHold</string>
+    <string name="alarm_turn_off_mode_shake_device" translatable="false">shakeDevice</string>
 </resources>

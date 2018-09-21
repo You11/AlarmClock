@@ -1,11 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:padding="10dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/activated_alarm_name_label"
+        android:textSize="16sp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/activated_alarm_name_label"
+        android:id="@+id/activated_alarm_time_label"
+        android:textSize="48sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/activated_alarm_time_label"
+        android:layout_centerHorizontal="true"
+        android:textSize="16sp"
         android:id="@+id/activated_alarm_shake_text"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/activated_alarm_shake_text"
+        android:id="@+id/activated_alarm_delay_button"
+        android:layout_centerHorizontal="true"
+        android:text="@string/activated_alarm_delay_button"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        style="?android:attr/buttonBarButtonStyle"/>
 
 </RelativeLayout>

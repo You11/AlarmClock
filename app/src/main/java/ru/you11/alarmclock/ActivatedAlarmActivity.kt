@@ -44,6 +44,9 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var amountOfShakeTimes = 10
 
+    //TEMP
+    private val secondsToHoldButton: Long = 5
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,19 +80,30 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                             setContentView(R.layout.activity_activated_alarm_press)
                             setupDelayButton()
                             setupTurnOffButton()
+                            setupLabelText()
                         }
 
                         alarm.TURN_OFF_MODE_BUTTON_HOLD -> {
                             setContentView(R.layout.activity_activated_alarm_hold)
                             setupOnHoldTurnOffButton()
+                            setupTooltipForHoldButton()
+                            setupLabelText()
                         }
 
                         alarm.TURN_OFF_MODE_SHAKE_DEVICE -> {
                             setContentView(R.layout.activity_activated_alarm_shake)
-                            setupShakeLayout()
+                            setupDelayButton()
+                            setupLabelText()
+                            setupAccelerometer()
                         }
                     }
                 })
+    }
+
+    private fun setupTooltipForHoldButton() {
+        findViewById<TextView>(R.id.activated_alarm_hold_button_tooltip)?.apply {
+            text = resources.getString(R.string.activated_alarm_hold_button_tooltip, secondsToHoldButton)
+        }
     }
 
     private fun wakeUpDevice() {
@@ -99,7 +113,19 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
     }
 
-    private fun setupShakeLayout() {
+    private fun setupLabelText() {
+        if (alarm.name.isNotBlank()) {
+            findViewById<TextView>(R.id.activated_alarm_name_label)?.apply {
+                text = alarm.name
+                visibility = TextView.VISIBLE
+            }
+        }
+        findViewById<TextView>(R.id.activated_alarm_time_label)?.apply {
+            text = Utils.getAlarmTime(alarm.hours, alarm.minutes)
+        }
+    }
+
+    private fun setupAccelerometer() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         if (accelerometer != null) {
@@ -203,7 +229,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             setOnTouchListener { v, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        Completable.timer(5, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                        Completable.timer(secondsToHoldButton, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                                 .subscribe {
                                     Toast.makeText(this@ActivatedAlarmActivity, context.getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
                                     finish()
