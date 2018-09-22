@@ -225,20 +225,23 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun setupOnHoldTurnOffButton() {
+        var isTurnedOff = false
         findViewById<Button>(R.id.activated_alarm_delay_button).apply {
-            setOnTouchListener { v, event ->
+            setOnTouchListener { _, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        Completable.timer(secondsToHoldButton, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    Toast.makeText(this@ActivatedAlarmActivity, context.getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
-                                    finish()
-                                }
+                        Completable.timer(secondsToHoldButton, TimeUnit.SECONDS, AndroidSchedulers.mainThread()).doOnComplete {
+                            isTurnedOff = true
+                            Toast.makeText(this@ActivatedAlarmActivity, context.getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
+                            finish()
+                        }.subscribe()
                         true
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        delayAlarm()
+                        if (!isTurnedOff) {
+                            delayAlarm()
+                        }
                         true
                     }
 
