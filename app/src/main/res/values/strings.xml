@@ -37,7 +37,7 @@
     <string name="pref_alarm_shake_times_number_default" translatable="false">10</string>
 
     <string name="pref_alarm_seconds_hold_button_key" translatable="false">pref_seconds_hold_button</string>
-    <string name="pref_alarm_seconds_hold_button_title">Seconds to hold button to turn off alarm</string>
+    <string name="pref_alarm_seconds_hold_button_title">Time to hold button to turn off alarm</string>
     <plurals name="pref_alarm_seconds_hold_button_summary">
         <item quantity="one">%d second</item>
         <item quantity="other">%d seconds</item>
@@ -47,7 +47,10 @@
     <string name="activated_alarm_delay_button">Later</string>
     <string name="activated_alarm_turn_off_button">Turn off</string>
     <string name="activated_alarm_delay_or_turn_off_button">Later/Turn off</string>
-    <string name="activated_alarm_hold_button_tooltip">Hold button for %1$d seconds</string>
+    <plurals name="activated_alarm_hold_button_tooltip">
+        <item quantity="one">Hold button for %d second</item>
+        <item quantity="other">Hold button for %d seconds</item>
+    </plurals>
 
     <string name="alarm_setup_time_text_view">Time of alarm</string>
     <string name="alarm_setup_vibrate_text_view">Vibrate</string>
@@ -56,7 +59,7 @@
     <string name="alarm_setup_turn_off_dialog_button_press_mode">Button press</string>
     <string name="alarm_setup_turn_off_dialog_button_hold_mode">Button hold</string>
     <string name="alarm_setup_turn_off_dialog_shake_device_mode">Shake device</string>
-    <string name="alarm_setup_ringtone_dialog_title">Set ringtone for alarm:</string>
+    <string name="alarm_setup_ringtone_dialog_title">Set ringtone for alarm</string>
     <string name="alarm_setup_ringtone_text_view">Ringtone</string>
     <string name="alarm_setup_name_hint_edit_text">Name of your alarm</string>
     <string name="alarm_setup_days_monday_text_view">MON</string>

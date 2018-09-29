@@ -115,7 +115,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun setupTooltipForHoldButton() {
         findViewById<TextView>(R.id.activated_alarm_hold_button_tooltip)?.apply {
-            text = resources.getString(R.string.activated_alarm_hold_button_tooltip, secondsToHoldButton)
+            text = resources.getQuantityString(R.plurals.activated_alarm_hold_button_tooltip, secondsToHoldButton, secondsToHoldButton)
         }
     }
 
