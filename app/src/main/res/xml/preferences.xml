@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <android.support.v7.preference.ListPreference
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ListPreference
         android:title="@string/pref_alarm_delay_time_title"
         android:key="@string/pref_alarm_delay_time_key"
         android:dialogTitle="@string/pref_alarm_delay_time_dialog_title"
@@ -9,12 +10,20 @@
         android:defaultValue="@string/pref_alarm_delay_time_default"
         android:summary="%s"/>
 
-    <android.support.v7.preference.SeekBarPreference android:title="@string/pref_alarm_volume_value_title"
+    <ru.you11.alarmclock.SeekBarPreference android:title="@string/pref_alarm_volume_value_title"
         android:key="@string/pref_alarm_volume_value_key"
-        android:max="100"
-        android:defaultValue="75" />
+        android:defaultValue="@string/pref_alarm_volume_value_default"/>
 
-    <android.support.v7.preference.CheckBoxPreference android:title="@string/pref_alarm_volume_in_silent_title"
+    <CheckBoxPreference android:title="@string/pref_alarm_volume_in_silent_title"
         android:key="@string/pref_alarm_volume_in_silent_key"
         android:defaultValue="true"/>
-</android.support.v7.preference.PreferenceScreen>
+
+    <ru.you11.alarmclock.NumberPickerPreference android:title="@string/pref_alarm_shake_times_number_title"
+        android:key="@string/pref_alarm_shake_times_number_key"
+        android:defaultValue="@string/pref_alarm_shake_times_number_default"/>
+
+    <ru.you11.alarmclock.NumberPickerPreference android:title="@string/pref_alarm_seconds_hold_button_title"
+        android:key="@string/pref_alarm_seconds_hold_button_key"
+        android:defaultValue="@string/pref_alarm_seconds_hold_button_default" />
+
+</PreferenceScreen>

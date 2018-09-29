@@ -42,15 +42,19 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private lateinit var vibrator: Vibrator
     private var lastShakeTime: Long = System.currentTimeMillis()
     private lateinit var sensorManager: SensorManager
-    private var amountOfShakeTimes = 10
 
-    //TEMP
-    private val secondsToHoldButton: Long = 5
+    //Prefs
+    private var secondsToHoldButton: Int = 0
+    private var amountOfShakeTimes = 0
+    private var volume = 0f
+    private var delayAlarmTime = 0
+    private var playSoundInSilent = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         wakeUpDevice()
+        setupPreferences()
 
         viewModelFactory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
@@ -98,6 +102,15 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                         }
                     }
                 })
+    }
+
+    private fun setupPreferences() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        secondsToHoldButton = prefs.getInt(resources.getString(R.string.pref_alarm_seconds_hold_button_key), resources.getString(R.string.pref_alarm_seconds_hold_button_default).toInt())
+        amountOfShakeTimes = prefs.getInt(resources.getString(R.string.pref_alarm_shake_times_number_key), resources.getString(R.string.pref_alarm_shake_times_number_default).toInt())
+        volume = prefs.getInt(resources.getString(R.string.pref_alarm_volume_value_key), 75).toFloat() / 100
+        delayAlarmTime = prefs.getString(resources.getString(R.string.pref_alarm_delay_time_key), resources.getString(R.string.pref_alarm_delay_time_default)).toInt()
+        playSoundInSilent = prefs.getBoolean(resources.getString(R.string.pref_alarm_volume_in_silent_key), true)
     }
 
     private fun setupTooltipForHoldButton() {
@@ -154,9 +167,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             mediaPlayer.setAudioAttributes(attributes)
         }
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val volume = prefs.getInt(resources.getString(R.string.pref_alarm_volume_value_key), 75).toFloat() / 100
-
         mediaPlayer.setVolume(volume, volume)
         mediaPlayer.setDataSource(this, Uri.parse(alarm.ringtone))
         mediaPlayer.prepareAsync()
@@ -167,7 +177,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             vibrate()
         }
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val playSoundInSilent = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(resources.getString(R.string.pref_alarm_volume_in_silent_key), false)
         if (playSoundInSilent || audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL)
             setupMediaPlayer()
             mediaPlayer.setOnPreparedListener {
@@ -195,17 +204,10 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun delayAlarm() {
-        val delayTime = getDelayAlarmTime()
-        updateAlarmTime(alarm, delayTime)
+        updateAlarmTime(alarm, delayAlarmTime)
         Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
-        Toast.makeText(this@ActivatedAlarmActivity, resources.getQuantityString(R.plurals.activated_alarm_delay_toast, delayTime, delayTime), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@ActivatedAlarmActivity, resources.getQuantityString(R.plurals.activated_alarm_delay_toast, delayAlarmTime, delayAlarmTime), Toast.LENGTH_SHORT).show()
         finish()
-    }
-
-    private fun getDelayAlarmTime(): Int {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
-        return sharedPref.getString(resources.getString(R.string.pref_alarm_delay_time_key),
-                resources.getString(R.string.pref_alarm_delay_time_default)).toInt()
     }
 
     private fun updateAlarmTime(alarm: Alarm, delayTime: Int) {
@@ -230,7 +232,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             setOnTouchListener { _, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        Completable.timer(secondsToHoldButton, TimeUnit.SECONDS, AndroidSchedulers.mainThread()).doOnComplete {
+                        Completable.timer(secondsToHoldButton.toLong(), TimeUnit.SECONDS, AndroidSchedulers.mainThread()).doOnComplete {
                             isTurnedOff = true
                             Toast.makeText(this@ActivatedAlarmActivity, context.getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
                             finish()
