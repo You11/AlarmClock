@@ -32,8 +32,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-
-        // clear all the subscription
         disposable.clear()
     }
 }

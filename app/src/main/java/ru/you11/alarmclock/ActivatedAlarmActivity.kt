@@ -40,8 +40,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
     private val mediaPlayer = MediaPlayer()
     private lateinit var vibrator: Vibrator
-    private var lastShakeTime: Long = System.currentTimeMillis()
     private lateinit var sensorManager: SensorManager
+    private var lastShakeTime: Long = System.currentTimeMillis()
 
     //Prefs
     private var secondsToHoldButton: Int = 0
@@ -60,9 +60,9 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
-        updateNotification()
+        updateAlarmNotification()
 
-        val alarmId = intent.extras.getLong("alarmId") / 10
+        val alarmId = getCurrentAlarmId()
 
         disposable.add(viewModel.getAlarm(alarmId)
                 .subscribeOn(Schedulers.single())
@@ -70,38 +70,76 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                 .subscribe { alarm ->
                     this.alarm = alarm
 
-                    var turnOffMode = ""
-                    alarm.turnOffMode.forEach {
-                        if (it.value)
-                            turnOffMode = it.key
-                    }
-                    if (turnOffMode == "") return@subscribe
+                    val turnOffMode = getTurnOffModeFromAlarm(alarm)
 
-                    makeNoise()
+                    ringAlarm()
 
                     when (turnOffMode) {
                         alarm.TURN_OFF_MODE_BUTTON_PRESS -> {
-                            setContentView(R.layout.activity_activated_alarm_press)
-                            setupDelayButton()
-                            setupTurnOffButton()
-                            setupLabelText()
+                            setupPressButtonDialog()
                         }
 
                         alarm.TURN_OFF_MODE_BUTTON_HOLD -> {
-                            setContentView(R.layout.activity_activated_alarm_hold)
-                            setupOnHoldTurnOffButton()
-                            setupTooltipForHoldButton()
-                            setupLabelText()
+                            setupHoldButtonDialog()
                         }
 
                         alarm.TURN_OFF_MODE_SHAKE_DEVICE -> {
-                            setContentView(R.layout.activity_activated_alarm_shake)
-                            setupDelayButton()
-                            setupLabelText()
-                            setupAccelerometer()
+                            setupShakeDeviceDialog()
                         }
                     }
                 })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (this.isFinishing) {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+            vibrator.cancel()
+            disposable.clear()
+        }
+    }
+
+    private fun getCurrentAlarmId(): Long {
+        return intent.extras.getLong("alarmId") / 10
+    }
+
+    private fun getTurnOffModeFromAlarm(alarm: Alarm): String {
+        var turnOffMode = ""
+        alarm.turnOffMode.forEach {
+            if (it.value)
+                turnOffMode = it.key
+        }
+
+        return turnOffMode
+    }
+
+    private fun setupPressButtonDialog() {
+        setContentView(R.layout.activity_activated_alarm_press)
+        setupLabelTextForDialog()
+        setupDelayButton()
+        setupTurnOffButton()
+    }
+
+    private fun setupHoldButtonDialog() {
+        setContentView(R.layout.activity_activated_alarm_hold)
+        setupLabelTextForDialog()
+        setupTooltipForHoldButton()
+        setupOnHoldTurnOffButton()
+    }
+
+    private fun setupShakeDeviceDialog() {
+        setContentView(R.layout.activity_activated_alarm_shake)
+        setupAccelerometer()
+        setupLabelTextForDialog()
+        setupDelayButton()
+    }
+
+    private fun wakeUpDevice() {
+        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
     }
 
     private fun setupPreferences() {
@@ -119,14 +157,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun wakeUpDevice() {
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
-    }
-
-    private fun setupLabelText() {
+    private fun setupLabelTextForDialog() {
         if (alarm.name.isNotBlank()) {
             findViewById<TextView>(R.id.activated_alarm_name_label)?.apply {
                 text = alarm.name
@@ -147,7 +178,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun updateNotification() {
+    private fun updateAlarmNotification() {
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -172,16 +203,21 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         mediaPlayer.prepareAsync()
     }
 
-    private fun makeNoise() {
+    private fun ringAlarm() {
         if (alarm.vibrate) {
             vibrate()
         }
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if (playSoundInSilent || audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL)
+
+        if (shouldPlaySound())
             setupMediaPlayer()
             mediaPlayer.setOnPreparedListener {
                 mediaPlayer.start()
             }
+    }
+
+    private fun shouldPlaySound(): Boolean {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        return playSoundInSilent || audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL
     }
 
     private fun vibrate() {
@@ -204,13 +240,13 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun delayAlarm() {
-        updateAlarmTime(alarm, delayAlarmTime)
+        addDelayTimeToAlarm(alarm, delayAlarmTime)
         Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
         Toast.makeText(this@ActivatedAlarmActivity, resources.getQuantityString(R.plurals.activated_alarm_delay_toast, delayAlarmTime, delayAlarmTime), Toast.LENGTH_SHORT).show()
         finish()
     }
 
-    private fun updateAlarmTime(alarm: Alarm, delayTime: Int) {
+    private fun addDelayTimeToAlarm(alarm: Alarm, delayTime: Int) {
         val currentTime = Calendar.getInstance()
         currentTime.add(Calendar.MINUTE, delayTime)
 
@@ -227,7 +263,9 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun setupOnHoldTurnOffButton() {
+        //without it notification will be always shown
         var isTurnedOff = false
+
         findViewById<Button>(R.id.activated_alarm_delay_button).apply {
             setOnTouchListener { _, event ->
                 when (event.action) {
@@ -255,16 +293,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        if (this.isFinishing) {
-            mediaPlayer.stop()
-            mediaPlayer.release()
-            vibrator.cancel()
-            disposable.clear()
-        }
-    }
-
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
 
     }
@@ -284,16 +312,20 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     Math.pow(z, 2.0)) - SensorManager.GRAVITY_EARTH
 
             if (acceleration > shakeThreshold) {
-                lastShakeTime = System.currentTimeMillis()
-
-                amountOfShakeTimes--
-                changeTextInShakeDialog()
-
-                if (amountOfShakeTimes == 0) {
-                    sensorManager.unregisterListener(this)
-                    finish()
-                }
+                onRegisteredShake()
             }
+        }
+    }
+
+    private fun onRegisteredShake() {
+        lastShakeTime = System.currentTimeMillis()
+
+        amountOfShakeTimes--
+        changeTextInShakeDialog()
+
+        if (amountOfShakeTimes == 0) {
+            sensorManager.unregisterListener(this)
+            finish()
         }
     }
 

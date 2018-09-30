@@ -19,13 +19,13 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/alarm_setup_time_text_view"
+                android:text="@string/alarm_setup_time_label"
                 android:textSize="16sp"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/alarm_setup_time_summary"
+                android:id="@+id/alarm_setup_time_text_summary"
                 android:textSize="14sp"/>
         </LinearLayout>
 

@@ -34,6 +34,7 @@ object Utils {
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
 
         val currentDate = Calendar.getInstance()
+        //sets several alarms
         alarm.days.forEach {
             if (it.value) {
                 val alarmIntent = setupAlarmIntent(alarm.aid * 10 + alarm.daysStringToCalendar[it.key]!!, context)
@@ -85,9 +86,38 @@ object Utils {
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
     }
 
-    private fun dismissAlarmNotification(context: Context) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(ALARM_NOTIFICATION_ID)
+    private fun setupNotification(context: Context, alarm: Alarm): NotificationCompat.Builder {
+        val notification = NotificationCompat.Builder(context, "100")
+        notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
+        notification.setOnlyAlertOnce(true)
+        if (alarm.name.isBlank()) {
+            notification.setContentTitle(context.resources.getString(R.string.notification_default_title))
+        } else {
+            notification.setContentTitle(alarm.name)
+        }
+
+        val day = getAlarmDayForNotification(alarm)
+
+        notification.setContentText(day + ", " + getAlarmTime(alarm.hours, alarm.minutes))
+        notification.priority = NotificationCompat.PRIORITY_DEFAULT
+        notification.setOngoing(true)
+
+        setupNotificationIntent(context, notification)
+
+        return notification
+    }
+
+    private fun getAlarmDayForNotification(alarm: Alarm): String {
+        var day = ""
+
+        alarm.days.forEach {
+            if (it.value) {
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
+                day = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
+            }
+        }
+        return day
     }
 
     //returns time string for recycler view and notification
@@ -100,10 +130,15 @@ object Utils {
         return DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time)
     }
 
+    private fun dismissAlarmNotification(context: Context) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(ALARM_NOTIFICATION_ID)
+    }
+
     private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
 
         //todo: refactoring
-        var earliestDate: Calendar = Calendar.getInstance()
+        var earliestDate = Calendar.getInstance()
         earliestDate.timeInMillis = Long.MAX_VALUE
         var earliestAlarm: Alarm? = null
 
@@ -129,53 +164,28 @@ object Utils {
             }
         }
 
+        setDaysInEarliestAlarm(earliestAlarm, earliestDate)
+
+        return earliestAlarm
+    }
+
+    private fun setDaysInEarliestAlarm(earliestAlarm: Alarm?, earliestDate: Calendar) {
         if (earliestAlarm != null) {
             val alarmDay = earliestDate[Calendar.DAY_OF_WEEK]
-            for (day in earliestAlarm!!.days) {
-                if (earliestAlarm!!.daysStringToCalendar[day.key] == alarmDay) {
+            for (day in earliestAlarm.days) {
+                if (earliestAlarm.daysStringToCalendar[day.key] == alarmDay) {
                     day.setValue(true)
                 } else {
                     day.setValue(false)
                 }
             }
         }
-
-        return earliestAlarm
     }
 
     private fun setupAlarmIntent(id: Long, context: Context): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("alarmId", id)
         return PendingIntent.getBroadcast(context, id.toInt(), intent, 0)
-    }
-
-    private fun setupNotification(context: Context, alarm: Alarm): NotificationCompat.Builder {
-        val notification = NotificationCompat.Builder(context, "100")
-        notification.setSmallIcon(R.drawable.baseline_alarm_white_18)
-        notification.setOnlyAlertOnce(true)
-        if (alarm.name.isBlank()) {
-            notification.setContentTitle(context.resources.getString(R.string.notification_default_title))
-        } else {
-            notification.setContentTitle(alarm.name)
-        }
-
-        var day = ""
-
-        alarm.days.forEach {
-            if (it.value) {
-                val calendar = Calendar.getInstance()
-                calendar.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
-                day = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
-            }
-        }
-
-        notification.setContentText(day + ", " + getAlarmTime(alarm.hours, alarm.minutes))
-        notification.priority = NotificationCompat.PRIORITY_DEFAULT
-        notification.setOngoing(true)
-
-        setupNotificationIntent(context, notification)
-
-        return notification
     }
 
     private fun setupNotificationIntent(context: Context, notification: NotificationCompat.Builder) {

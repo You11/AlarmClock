@@ -9,12 +9,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.*
 import android.widget.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import java.text.DateFormat
 import java.util.*
 
 class AlarmsListFragment: Fragment() {
@@ -36,8 +34,6 @@ class AlarmsListFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
-        setupStopButton()
-        setupDeleteButton()
         setupRecyclerView()
     }
 
@@ -57,38 +53,6 @@ class AlarmsListFragment: Fragment() {
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun setupStopButton() {
-        view?.findViewById<Button>(R.id.all_alarms_stop_button)?.apply {
-            setOnClickListener { _ ->
-                val alarmManager = activity.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-                activity.disposable.add(activity.viewModel.getAlarmList()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            for (alarm in it) {
-                                Utils.stopAlarm(alarm.aid, alarmManager, activity)
-                            }
-
-                            Log.d("alarm", "alarms stopped")
-                        })
-            }
-        }
-    }
-
-    private fun setupDeleteButton() {
-        view?.findViewById<Button>(R.id.all_alarms_delete_button)?.apply {
-            setOnClickListener {
-                activity.disposable.add(activity.viewModel.deleteAllAlarms()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            alarms.clear()
-                            view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.adapter?.notifyDataSetChanged()
-                        })
-            }
-        }
     }
 
     private fun setupRecyclerView() {
@@ -163,33 +127,37 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
         if (alarm.isOn) switch.isChecked = true
 
         switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            buttonView.isEnabled = false
             val activity = buttonView.context as MainActivity
             if (isChecked) {
-                //turn on alarm
-                buttonView.isEnabled = false
-                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid, true)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            allAlarms[position].isOn = true
-                            Utils.setAlarmWithDays(alarm, activity)
-                            Utils.updateAlarmNotification(allAlarms, activity)
-                            buttonView.isEnabled = true
-                        })
+                turnOnAlarm(activity, alarm, position)
             } else {
-                //turn off alarm
-                buttonView.isEnabled = false
-                activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid, false)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            allAlarms[position].isOn = false
-                            Utils.stopAlarm(alarm.aid!!, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
-                            Utils.updateAlarmNotification(allAlarms, activity)
-                            buttonView.isEnabled = true
-                        })
+                turnOffAlarm(activity, alarm, position)
             }
+            buttonView.isEnabled = true
         }
+    }
+
+    private fun turnOnAlarm(activity: MainActivity, alarm: Alarm, positionInRV: Int) {
+        activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid, true)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    allAlarms[positionInRV].isOn = true
+                    Utils.setAlarmWithDays(alarm, activity)
+                    Utils.updateAlarmNotification(allAlarms, activity)
+                })
+    }
+
+    private fun turnOffAlarm(activity: MainActivity, alarm: Alarm, positionInRV: Int) {
+        activity.disposable.add(activity.viewModel.updateAlarmStatus(alarm.aid, false)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    allAlarms[positionInRV].isOn = false
+                    Utils.stopAlarm(alarm.aid, activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager, activity)
+                    Utils.updateAlarmNotification(allAlarms, activity)
+                })
     }
 
     override fun getItemCount(): Int {

@@ -20,17 +20,21 @@ class NumberPickerPreference(context: Context, attributes: AttributeSet): Dialog
     var minValue = 0
 
     override fun onCreateDialogView(): View {
+        setupNumberPicker()
+
+        val dialogView = FrameLayout(context)
+        dialogView.addView(picker)
+
+        return dialogView
+    }
+
+    private fun setupNumberPicker() {
         val layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         layoutParams.gravity = Gravity.CENTER
 
         picker = NumberPicker(context)
         picker.layoutParams = layoutParams
-
-        val dialogView = FrameLayout(context)
-        dialogView.addView(picker)
-
-        return dialogView
     }
 
     override fun onBindDialogView(view: View?) {

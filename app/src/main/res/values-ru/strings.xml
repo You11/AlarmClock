@@ -33,7 +33,7 @@
     <string name="pref_alarm_shake_times_number_title">Встряхиваний для выключения будильника</string>
     <string name="alarm_setup_days_sunday_text_view">ВС</string>
     <string name="alarm_setup_days_thursday_text_view">ЧТ</string>
-    <string name="alarm_setup_time_text_view">Время будильника</string>
+    <string name="alarm_setup_time_label">Время будильника</string>
     <string name="alarm_setup_days_tuesday_text_view">ВТ</string>
     <string name="activated_alarm_turn_off_toast">Выключено</string>
     <string name="activated_alarm_turn_off_button">Выключить</string>
