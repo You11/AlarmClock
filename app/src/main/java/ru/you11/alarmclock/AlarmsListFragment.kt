@@ -93,6 +93,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
         val name: TextView = layout.findViewById(R.id.alarm_card_name_text_view)
         val time: TextView = layout.findViewById(R.id.alarm_card_time_text_view)
         val switch: Switch = layout.findViewById(R.id.alarm_card_switch)
+        val days: TextView = layout.findViewById(R.id.alarm_card_days_text_view)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlarmsRWAdapter.ViewHolder {
@@ -106,11 +107,10 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val alarm = allAlarms[position]
 
-        holder.name.text = alarm.name
-        holder.time.text = Utils.getAlarmTime(alarm.hours, alarm.minutes)
-
-        //turn alarm off/on
-        setupSwitch(holder.switch, alarm, position)
+        setupAlarmNameText(holder.name, alarm)
+        setupAlarmTimeText(holder.time, alarm)
+        setupAlarmSwitch(holder.switch, alarm, position)
+        setupAlarmDaysText(holder.days, alarm)
 
         //edit alarm
         holder.layout.setOnClickListener {
@@ -122,7 +122,18 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
         }
     }
 
-    private fun setupSwitch(switch: Switch, alarm: Alarm, position: Int) {
+    private fun setupAlarmNameText(name: TextView, alarm: Alarm) {
+        if (alarm.name.isNotBlank()) {
+            name.text = alarm.name
+            name.visibility = TextView.VISIBLE
+        }
+    }
+
+    private fun setupAlarmTimeText(time: TextView, alarm: Alarm) {
+        time.text = Utils.getAlarmTime(alarm.hours, alarm.minutes)
+    }
+
+    private fun setupAlarmSwitch(switch: Switch, alarm: Alarm, position: Int) {
 
         if (alarm.isOn) switch.isChecked = true
 
@@ -136,6 +147,30 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
             }
             buttonView.isEnabled = true
         }
+    }
+
+    private fun setupAlarmDaysText(days: TextView, alarm: Alarm) {
+        var daysText = ""
+
+        val resources = MainApp.applicationContext().resources
+        val daysToAbbr = hashMapOf<String, String>(
+                resources.getString(R.string.alarm_days_monday) to resources.getString(R.string.alarm_setup_days_monday_text_view),
+                resources.getString(R.string.alarm_days_tuesday) to resources.getString(R.string.alarm_setup_days_tuesday_text_view),
+                resources.getString(R.string.alarm_days_wednesday) to resources.getString(R.string.alarm_setup_days_wednesday_text_view),
+                resources.getString(R.string.alarm_days_thursday) to resources.getString(R.string.alarm_setup_days_thursday_text_view),
+                resources.getString(R.string.alarm_days_friday) to resources.getString(R.string.alarm_setup_days_friday_text_view),
+                resources.getString(R.string.alarm_days_saturday) to resources.getString(R.string.alarm_setup_days_saturday_text_view),
+                resources.getString(R.string.alarm_days_sunday) to resources.getString(R.string.alarm_setup_days_sunday_text_view))
+
+        alarm.days.forEach {
+            if (it.value) {
+                daysText += daysToAbbr[it.key]
+                daysText += ", "
+            }
+        }
+        daysText = daysText.dropLast(2)
+
+        days.text = daysText
     }
 
     private fun turnOnAlarm(activity: MainActivity, alarm: Alarm, positionInRV: Int) {

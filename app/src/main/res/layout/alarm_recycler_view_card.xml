@@ -9,18 +9,26 @@
         android:id="@+id/alarm_card_time_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp" />
+        android:textSize="28sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/alarm_card_name_text_view"
-        android:layout_below="@id/alarm_card_time_text_view"/>
+        android:layout_below="@id/alarm_card_time_text_view"
+        android:visibility="gone"/>
 
     <Switch
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:id="@+id/alarm_card_switch"/>
+        android:id="@+id/alarm_card_switch"
+        android:layout_centerVertical="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/alarm_card_days_text_view"
+        android:layout_below="@id/alarm_card_name_text_view"/>
 </RelativeLayout>

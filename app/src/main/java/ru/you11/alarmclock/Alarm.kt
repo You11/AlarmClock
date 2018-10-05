@@ -5,18 +5,19 @@ import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import ru.you11.alarmclock.database.HashmapToStringConventer
+import ru.you11.alarmclock.database.LinkedHashmapToStringConventer
 import java.util.*
 import kotlin.collections.HashMap
 
 @Parcelize
 @Entity(tableName = "alarmData")
-@TypeConverters(HashmapToStringConventer::class)
+@TypeConverters(LinkedHashmapToStringConventer::class, HashmapToStringConventer::class)
 data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
                  @ColumnInfo(name = "name") var name: String = "",
                  @ColumnInfo(name = "hours") var hours: Int = -1,
                  @ColumnInfo(name = "minutes") var minutes: Int = -1,
                  @ColumnInfo(name = "isVibrate") var vibrate: Boolean = false,
-                 @ColumnInfo(name = "days") var days: HashMap<String, Boolean> = hashMapOf(MainApp.applicationContext().resources.getString(R.string.alarm_days_monday) to true,
+                 @ColumnInfo(name = "days") var days: LinkedHashMap<String, Boolean> = linkedMapOf(MainApp.applicationContext().resources.getString(R.string.alarm_days_monday) to true,
                          MainApp.applicationContext().resources.getString(R.string.alarm_days_tuesday) to true,
                          MainApp.applicationContext().resources.getString(R.string.alarm_days_wednesday) to true,
                          MainApp.applicationContext().resources.getString(R.string.alarm_days_thursday) to true,
