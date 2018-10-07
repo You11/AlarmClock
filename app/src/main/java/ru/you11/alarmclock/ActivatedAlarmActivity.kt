@@ -241,7 +241,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun delayAlarm() {
         addDelayTimeToAlarm(alarm, delayAlarmTime)
-        Utils.setDelayedAlarm(alarm, this@ActivatedAlarmActivity)
+        Utils.setSingleAlarm(alarm, this@ActivatedAlarmActivity)
         Toast.makeText(this@ActivatedAlarmActivity, resources.getQuantityString(R.plurals.activated_alarm_delay_toast, delayAlarmTime, delayAlarmTime), Toast.LENGTH_SHORT).show()
         finish()
     }
@@ -257,7 +257,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private fun setupTurnOffButton() {
         findViewById<Button>(R.id.activated_alarm_turn_off_button).apply {
             setOnClickListener {
-                finish()
+                turnOffAlarm()
             }
         }
     }
@@ -272,8 +272,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     MotionEvent.ACTION_DOWN -> {
                         Completable.timer(secondsToHoldButton.toLong(), TimeUnit.SECONDS, AndroidSchedulers.mainThread()).doOnComplete {
                             isTurnedOff = true
-                            Toast.makeText(this@ActivatedAlarmActivity, context.getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
-                            finish()
+                            turnOffAlarm()
                         }.subscribe()
                         true
                     }
@@ -290,6 +289,21 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     }
                 }
             }
+        }
+    }
+
+    private fun turnOffAlarm() {
+        Toast.makeText(this@ActivatedAlarmActivity, getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
+        if (alarm.isSingleAlarm()) {
+            disposable.add(viewModel.updateAlarmStatus(alarm.aid, false)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        //TODO: alarm recycler view does not update status immediately
+                        finish()
+                    })
+        } else {
+            finish()
         }
     }
 

@@ -66,8 +66,6 @@ class AlarmsListFragment: Fragment() {
             layoutManager = rvManager
             adapter = rvAdapter
         }
-
-
     }
 
     private fun loadAlarmsIntoRV(rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
@@ -150,6 +148,11 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
     }
 
     private fun setupAlarmDaysText(days: TextView, alarm: Alarm) {
+        if (alarm.isSingleAlarm()) {
+            days.text = MainApp.applicationContext().resources.getString(R.string.alarm_list_single_alarm_days_description)
+            return
+        }
+
         var daysText = ""
 
         val resources = MainApp.applicationContext().resources

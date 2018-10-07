@@ -73,6 +73,32 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
             }
         }
 
+        if (isSingleAlarm()) {
+            val alarmDate = Calendar.getInstance()
+            alarmDate.set(Calendar.HOUR_OF_DAY, hours)
+            alarmDate.set(Calendar.MINUTE, minutes)
+            alarmDate.set(Calendar.SECOND, 0)
+            if (alarmDate.before(Calendar.getInstance())) {
+                alarmDate.add(Calendar.DAY_OF_YEAR, 1)
+            }
+
+            if (alarmDate.before(earliestDate)) {
+                earliestDate = alarmDate
+            }
+        }
+
         return earliestDate
+    }
+
+    fun isSingleAlarm(): Boolean {
+        var isSingle = true
+
+        days.forEach {
+            if (it.value) {
+                isSingle = false
+            }
+        }
+
+        return isSingle
     }
 }

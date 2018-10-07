@@ -102,4 +102,6 @@
         <item quantity="many">%d минут</item>
         <item quantity="other">%d минут</item>
     </plurals>
+    <string name="alarm_setup_single_alarm">Одиночный будильник</string>
+    <string name="alarm_list_single_alarm_days_description">Одиночный будильник</string>
 </resources>

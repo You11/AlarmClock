@@ -10,6 +10,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import java.text.DateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class AlarmSetupFragment: Fragment() {
 
@@ -44,6 +46,7 @@ class AlarmSetupFragment: Fragment() {
             setupUIOnEdit()
         }
 
+        setupSingleAlarmCheckbox()
         setupTimePicker()
         setupTurnOffModeButton()
         setupRingtoneButton()
@@ -207,18 +210,52 @@ class AlarmSetupFragment: Fragment() {
         view?.findViewById<TextView>(R.id.alarm_setup_ringtone_summary)?.text = RingtoneManager.getRingtone(activity, uri).getTitle(activity)
     }
 
-    private fun setupDays() {
-        val daysViews = hashMapOf<String, TextView>(resources.getString(R.string.alarm_days_monday) to view?.findViewById(R.id.alarm_setup_days_monday)!!,
-                resources.getString(R.string.alarm_days_tuesday) to view?.findViewById(R.id.alarm_setup_days_tuesday)!!,
-                resources.getString(R.string.alarm_days_wednesday) to view?.findViewById(R.id.alarm_setup_days_wednesday)!!,
-                resources.getString(R.string.alarm_days_thursday) to view?.findViewById(R.id.alarm_setup_days_thursday)!!,
-                resources.getString(R.string.alarm_days_friday) to view?.findViewById(R.id.alarm_setup_days_friday)!!,
-                resources.getString(R.string.alarm_days_saturday) to view?.findViewById(R.id.alarm_setup_days_saturday)!!,
-                resources.getString(R.string.alarm_days_sunday) to view?.findViewById(R.id.alarm_setup_days_sunday)!!)
+    private fun setupSingleAlarmCheckbox() {
+        view?.findViewById<CheckBox>(R.id.alarm_setup_single_alarm_checkbox)?.apply {
+            setOnClickListener {
+                val saveButton = view?.findViewById<Button>(R.id.alarm_setup_save_button)
+                val dayButtons = getDayButtonsArray()
 
+                if (isChecked) {
+                    disableDayButtons(dayButtons)
+                    saveButton?.isEnabled = true
+                } else {
+                    colorActiveDaysViews(getDaysToViewHashmap())
+                    enableDayButtons(dayButtons)
+                    saveButton?.isEnabled = isDaysSelected()
+                }
+            }
+        }
+    }
+
+    private fun getDayButtonsArray(): ArrayList<TextView> {
+        val daysLayout = view?.findViewById<LinearLayout>(R.id.alarm_setup_days_layout)!!
+        val dayButtons = ArrayList<TextView>()
+        for (i in 0 until daysLayout.childCount) {
+            dayButtons.add(daysLayout.getChildAt(i) as TextView)
+        }
+        return dayButtons
+    }
+
+    private fun enableDayButtons(dayButtons: ArrayList<TextView>) {
+        dayButtons.forEach { button ->
+            button.alpha = 1f
+            button.isEnabled = true
+        }
+    }
+
+    private fun disableDayButtons(dayButtons: ArrayList<TextView>) {
+        dayButtons.forEach { button ->
+            button.setTextColor(Color.GRAY)
+            button.alpha = .5f
+            button.isEnabled = false
+        }
+    }
+
+    private fun setupDays() {
+        val daysViews = getDaysToViewHashmap()
 
         daysViews.forEach {
-            setupInitialActiveDays(it)
 
             it.value.setOnClickListener { _ ->
                 if (alarm.days[it.key] == true) {
@@ -226,13 +263,40 @@ class AlarmSetupFragment: Fragment() {
                 } else {
                     setDayActive(it)
                 }
+
+                //save button is disabled if none selected
+                view?.findViewById<Button>(R.id.alarm_setup_save_button)?.apply {
+                    isEnabled = isDaysSelected()
+                }
             }
         }
     }
 
-    private fun setupInitialActiveDays(it: Map.Entry<String, TextView>) {
-        if (alarm.days[it.key] == true) {
-            it.value.setTextColor(Color.RED)
+    private fun getDaysToViewHashmap(): HashMap<String, TextView> {
+        return hashMapOf(resources.getString(R.string.alarm_days_monday) to view?.findViewById(R.id.alarm_setup_days_monday)!!,
+                resources.getString(R.string.alarm_days_tuesday) to view?.findViewById(R.id.alarm_setup_days_tuesday)!!,
+                resources.getString(R.string.alarm_days_wednesday) to view?.findViewById(R.id.alarm_setup_days_wednesday)!!,
+                resources.getString(R.string.alarm_days_thursday) to view?.findViewById(R.id.alarm_setup_days_thursday)!!,
+                resources.getString(R.string.alarm_days_friday) to view?.findViewById(R.id.alarm_setup_days_friday)!!,
+                resources.getString(R.string.alarm_days_saturday) to view?.findViewById(R.id.alarm_setup_days_saturday)!!,
+                resources.getString(R.string.alarm_days_sunday) to view?.findViewById(R.id.alarm_setup_days_sunday)!!)
+    }
+
+    private fun isDaysSelected(): Boolean {
+        var isDaysSelected = false
+
+        alarm.days.forEach {
+            if (it.value) isDaysSelected = true
+        }
+
+        return isDaysSelected
+    }
+
+    private fun colorActiveDaysViews(map: HashMap<String, TextView>) {
+        map.forEach {
+            if (alarm.days[it.key] == true) {
+                it.value.setTextColor(Color.RED)
+            }
         }
     }
 
@@ -308,6 +372,11 @@ class AlarmSetupFragment: Fragment() {
         val isAlarmVibratingView = view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox) ?: throw Exception("Checkbox view is null")
         disableUI(alarmNameView, alarmTimeView, isAlarmVibratingView)
 
+        if (view?.findViewById<CheckBox>(R.id.alarm_setup_single_alarm_checkbox)?.isChecked!!) {
+            for (day in alarm.days) {
+                day.setValue(false)
+            }
+        }
         alarm.name = alarmNameView.text?.toString()!!
         alarm.vibrate = isAlarmVibratingView.isChecked
         alarm.isOn = true
@@ -340,7 +409,11 @@ class AlarmSetupFragment: Fragment() {
                             .subscribe {
                                 alarm.aid = it
                                 allAlarms.add(alarm)
-                                Utils.setAlarmWithDays(alarm, activity)
+                                if (alarm.isSingleAlarm()) {
+                                    Utils.setSingleAlarm(alarm, activity)
+                                } else {
+                                    Utils.setAlarmWithDays(alarm, activity)
+                                }
                                 Utils.updateAlarmNotification(allAlarms, activity)
                                 makeToastWithRemainingTime(alarm)
 

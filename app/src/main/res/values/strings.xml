@@ -106,6 +106,7 @@
     <string name="alarm_turn_off_mode_shake_device" translatable="false">shakeDevice</string>
 
     <string name="alarm_remaining_time_toast">"Alarm will ring in "</string>
+    <string name="alarm_setup_single_alarm">Single alarm</string>
     <plurals name="alarm_remaining_time_toast_days">
         <item quantity="one">"%d day "</item>
         <item quantity="other">"%d days "</item>
@@ -118,4 +119,6 @@
         <item quantity="one">%d minute</item>
         <item quantity="other">%d minutes</item>
     </plurals>
+
+    <string name="alarm_list_single_alarm_days_description">Single alarm</string>
 </resources>

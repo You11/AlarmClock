@@ -15,7 +15,7 @@ object Utils {
     private const val NOTIFICATION_REQUEST_CODE = 101
 
     //triggers when user presses delay button
-    fun setDelayedAlarm(alarm: Alarm, context: Context) {
+    fun setSingleAlarm(alarm: Alarm, context: Context) {
 
         val alarmIntent = setupAlarmIntent(alarm.aid * 10, context)
 
@@ -26,6 +26,9 @@ object Utils {
         calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
         calendar.set(Calendar.MINUTE, alarm.minutes)
         calendar.set(Calendar.SECOND, 0)
+        if (calendar.before(Calendar.getInstance())) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
     }
@@ -96,9 +99,13 @@ object Utils {
             notification.setContentTitle(alarm.name)
         }
 
-        val day = getAlarmDayForNotification(alarm)
+        if (alarm.isSingleAlarm()) {
+            notification.setContentText(getAlarmTimeDescription(alarm.hours, alarm.minutes))
+        } else {
+            val day = getAlarmDayForNotification(alarm)
+            notification.setContentText(day + ", " + getAlarmTimeDescription(alarm.hours, alarm.minutes))
+        }
 
-        notification.setContentText(day + ", " + getAlarmTimeDescription(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
 
@@ -107,7 +114,7 @@ object Utils {
         return notification
     }
 
-    private fun getAlarmDayForNotification(alarm: Alarm): String {
+    private fun getAlarmDayForNotification(alarm: Alarm): String? {
         var day = ""
 
         alarm.days.forEach {
@@ -117,7 +124,7 @@ object Utils {
                 day = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault())
             }
         }
-        return day
+        return if (day == "") null else day
     }
 
     //returns time string for recycler view and notification
@@ -135,8 +142,8 @@ object Utils {
         notificationManager.cancel(ALARM_NOTIFICATION_ID)
     }
 
-    fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
-        //todo: refactoring
+    private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
+        //todo: REFACTORING PLEASE HOLY SHIT
         var earliestDate = Calendar.getInstance()
         earliestDate.timeInMillis = Long.MAX_VALUE
         var earliestAlarm: Alarm? = null
@@ -160,6 +167,21 @@ object Utils {
                         }
                     }
                 }
+
+                if (alarm.isSingleAlarm()) {
+                    val alarmDate = Calendar.getInstance()
+                    alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
+                    alarmDate.set(Calendar.MINUTE, alarm.minutes)
+                    alarmDate.set(Calendar.SECOND, 0)
+                    if (alarmDate.before(Calendar.getInstance())) {
+                        alarmDate.add(Calendar.DAY_OF_YEAR, 1)
+                    }
+
+                    if (alarmDate.before(earliestDate)) {
+                        earliestDate = alarmDate
+                        earliestAlarm = alarm
+                    }
+                }
             }
         }
 
@@ -169,7 +191,7 @@ object Utils {
     }
 
     private fun setDaysInEarliestAlarm(earliestAlarm: Alarm?, alarmDay: Int) {
-        if (earliestAlarm == null) return
+        if (earliestAlarm == null || earliestAlarm.isSingleAlarm()) return
 
         for (day in earliestAlarm.days) {
             if (earliestAlarm.daysStringToCalendar[day.key] == alarmDay) {
