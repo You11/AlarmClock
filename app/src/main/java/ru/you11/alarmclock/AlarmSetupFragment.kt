@@ -19,6 +19,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.text.DateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 class AlarmSetupFragment: Fragment() {
@@ -341,9 +342,42 @@ class AlarmSetupFragment: Fragment() {
                                 allAlarms.add(alarm)
                                 Utils.setAlarmWithDays(alarm, activity)
                                 Utils.updateAlarmNotification(allAlarms, activity)
+                                makeToastWithRemainingTime(alarm)
+
                                 fragmentManager?.popBackStack()
                             }
                 })
+    }
+
+    private fun makeToastWithRemainingTime(alarm: Alarm) {
+        val calendar = getRemainingTimeForAlarm(alarm.getEarliestDate())
+        val days = calendar[Calendar.DAY_OF_YEAR]
+        val hours = calendar[Calendar.HOUR_OF_DAY]
+        val minutes = calendar[Calendar.MINUTE]
+
+        var toastText = resources.getString(R.string.alarm_remaining_time_toast)
+        if (days != 0) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_days, days, days)
+        if (hours != 0) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_hours, hours, hours)
+        if (minutes != 0) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_minutes, minutes, minutes)
+
+        Toast.makeText(activity, toastText, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun getRemainingTimeForAlarm(earliestTime: Calendar): Calendar {
+        val remainingTime = Calendar.getInstance()
+        val currentTime = Calendar.getInstance()
+
+        //added minute because result is one minute earlier
+        val remainingMillis = (earliestTime.timeInMillis - currentTime.timeInMillis) + 1000 * 60
+        val days = TimeUnit.MILLISECONDS.toDays(remainingMillis)
+        val hours = TimeUnit.MILLISECONDS.toHours(remainingMillis) - TimeUnit.DAYS.toHours(days)
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMillis) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours)
+
+        remainingTime.set(Calendar.DAY_OF_YEAR, days.toInt())
+        remainingTime.set(Calendar.HOUR_OF_DAY, hours.toInt())
+        remainingTime.set(Calendar.MINUTE, minutes.toInt())
+
+        return remainingTime
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

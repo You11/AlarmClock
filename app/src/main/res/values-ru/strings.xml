@@ -82,4 +82,24 @@
         <item quantity="many">Встряхните устройство %d раз</item>
         <item quantity="other">Встряхните устройство %d раза</item>
     </plurals>
+
+    <string name="alarm_remaining_time_toast">"Будильник зазвонит через "</string>
+    <plurals name="alarm_remaining_time_toast_days">
+        <item quantity="one">"%d день "</item>
+        <item quantity="few">"%d дня "</item>
+        <item quantity="many">"%d дней "</item>
+        <item quantity="other">"%d дней "</item>
+    </plurals>
+    <plurals name="alarm_remaining_time_toast_hours">
+        <item quantity="one">"%d час "</item>
+        <item quantity="few">"%d часа "</item>
+        <item quantity="many">"%d часов "</item>
+        <item quantity="other">"%d часов "</item>
+    </plurals>
+    <plurals name="alarm_remaining_time_toast_minutes">
+        <item quantity="one">%d минуту</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
+    </plurals>
 </resources>

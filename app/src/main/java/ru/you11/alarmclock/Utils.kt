@@ -98,7 +98,7 @@ object Utils {
 
         val day = getAlarmDayForNotification(alarm)
 
-        notification.setContentText(day + ", " + getAlarmTime(alarm.hours, alarm.minutes))
+        notification.setContentText(day + ", " + getAlarmTimeDescription(alarm.hours, alarm.minutes))
         notification.priority = NotificationCompat.PRIORITY_DEFAULT
         notification.setOngoing(true)
 
@@ -121,7 +121,7 @@ object Utils {
     }
 
     //returns time string for recycler view and notification
-    fun getAlarmTime(hours: Int, minutes: Int): String {
+    fun getAlarmTimeDescription(hours: Int, minutes: Int): String {
 
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, hours)
@@ -135,8 +135,7 @@ object Utils {
         notificationManager.cancel(ALARM_NOTIFICATION_ID)
     }
 
-    private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
-
+    fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
         //todo: refactoring
         var earliestDate = Calendar.getInstance()
         earliestDate.timeInMillis = Long.MAX_VALUE
@@ -164,20 +163,19 @@ object Utils {
             }
         }
 
-        setDaysInEarliestAlarm(earliestAlarm, earliestDate)
+        setDaysInEarliestAlarm(earliestAlarm, earliestDate[Calendar.DAY_OF_WEEK])
 
         return earliestAlarm
     }
 
-    private fun setDaysInEarliestAlarm(earliestAlarm: Alarm?, earliestDate: Calendar) {
-        if (earliestAlarm != null) {
-            val alarmDay = earliestDate[Calendar.DAY_OF_WEEK]
-            for (day in earliestAlarm.days) {
-                if (earliestAlarm.daysStringToCalendar[day.key] == alarmDay) {
-                    day.setValue(true)
-                } else {
-                    day.setValue(false)
-                }
+    private fun setDaysInEarliestAlarm(earliestAlarm: Alarm?, alarmDay: Int) {
+        if (earliestAlarm == null) return
+
+        for (day in earliestAlarm.days) {
+            if (earliestAlarm.daysStringToCalendar[day.key] == alarmDay) {
+                day.setValue(true)
+            } else {
+                day.setValue(false)
             }
         }
     }

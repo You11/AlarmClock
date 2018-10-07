@@ -130,7 +130,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
     }
 
     private fun setupAlarmTimeText(time: TextView, alarm: Alarm) {
-        time.text = Utils.getAlarmTime(alarm.hours, alarm.minutes)
+        time.text = Utils.getAlarmTimeDescription(alarm.hours, alarm.minutes)
     }
 
     private fun setupAlarmSwitch(switch: Switch, alarm: Alarm, position: Int) {

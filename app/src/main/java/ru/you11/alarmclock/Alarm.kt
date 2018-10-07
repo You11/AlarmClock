@@ -51,4 +51,28 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
     @Ignore @IgnoredOnParcel
     val TURN_OFF_MODE_SHAKE_DEVICE = MainApp.applicationContext().resources.getString(R.string.alarm_turn_off_mode_shake_device)
 
+
+    fun getEarliestDate(): Calendar {
+        var earliestDate = Calendar.getInstance()
+        earliestDate.timeInMillis = Long.MAX_VALUE
+
+        days.forEach {
+            if (it.value) {
+                val alarmDate = Calendar.getInstance()
+                alarmDate.set(Calendar.HOUR_OF_DAY, hours)
+                alarmDate.set(Calendar.MINUTE, minutes)
+                alarmDate.set(Calendar.SECOND, 0)
+                alarmDate.set(Calendar.DAY_OF_WEEK, daysStringToCalendar[it.key]!!)
+                if (alarmDate.before(Calendar.getInstance())) {
+                    alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
+                }
+
+                if (alarmDate.before(earliestDate)) {
+                    earliestDate = alarmDate
+                }
+            }
+        }
+
+        return earliestDate
+    }
 }

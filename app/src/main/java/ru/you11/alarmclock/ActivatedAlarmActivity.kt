@@ -165,7 +165,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             }
         }
         findViewById<TextView>(R.id.activated_alarm_time_label)?.apply {
-            text = Utils.getAlarmTime(alarm.hours, alarm.minutes)
+            text = Utils.getAlarmTimeDescription(alarm.hours, alarm.minutes)
         }
     }
 

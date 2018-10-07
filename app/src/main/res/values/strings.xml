@@ -104,4 +104,18 @@
     <string name="alarm_turn_off_mode_press_button" translatable="false">buttonPress</string>
     <string name="alarm_turn_off_mode_hold_button" translatable="false">buttonHold</string>
     <string name="alarm_turn_off_mode_shake_device" translatable="false">shakeDevice</string>
+
+    <string name="alarm_remaining_time_toast">"Alarm will ring in "</string>
+    <plurals name="alarm_remaining_time_toast_days">
+        <item quantity="one">"%d day "</item>
+        <item quantity="other">"%d days "</item>
+    </plurals>
+    <plurals name="alarm_remaining_time_toast_hours">
+        <item quantity="one">"%d hour "</item>
+        <item quantity="other">"%d hours "</item>
+    </plurals>
+    <plurals name="alarm_remaining_time_toast_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
 </resources>
