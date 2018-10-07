@@ -356,7 +356,7 @@ class AlarmSetupFragment: Fragment() {
         val minutes = calendar[Calendar.MINUTE]
 
         var toastText = resources.getString(R.string.alarm_remaining_time_toast)
-        if (days != 0) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_days, days, days)
+        if (days != 0 && days != 365) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_days, days, days)
         if (hours != 0) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_hours, hours, hours)
         if (minutes != 0) toastText += resources.getQuantityString(R.plurals.alarm_remaining_time_toast_minutes, minutes, minutes)
 
@@ -368,14 +368,14 @@ class AlarmSetupFragment: Fragment() {
         val currentTime = Calendar.getInstance()
 
         //added minute because result is one minute earlier
-        val remainingMillis = (earliestTime.timeInMillis - currentTime.timeInMillis) + 1000 * 60
+        val remainingMillis = earliestTime.timeInMillis - currentTime.timeInMillis + 1000 * 60
         val days = TimeUnit.MILLISECONDS.toDays(remainingMillis)
         val hours = TimeUnit.MILLISECONDS.toHours(remainingMillis) - TimeUnit.DAYS.toHours(days)
         val minutes = TimeUnit.MILLISECONDS.toMinutes(remainingMillis) - TimeUnit.DAYS.toMinutes(days) - TimeUnit.HOURS.toMinutes(hours)
 
-        remainingTime.set(Calendar.DAY_OF_YEAR, days.toInt())
-        remainingTime.set(Calendar.HOUR_OF_DAY, hours.toInt())
         remainingTime.set(Calendar.MINUTE, minutes.toInt())
+        remainingTime.set(Calendar.HOUR_OF_DAY, hours.toInt())
+        remainingTime.set(Calendar.DAY_OF_YEAR, days.toInt())
 
         return remainingTime
     }
