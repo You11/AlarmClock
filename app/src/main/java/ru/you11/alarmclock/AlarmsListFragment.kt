@@ -68,7 +68,7 @@ class AlarmsListFragment: Fragment() {
         }
     }
 
-    private fun loadAlarmsIntoRV(rvAdapter: AlarmsRWAdapter): ArrayList<Alarm> {
+    private fun loadAlarmsIntoRV(rvAdapter: AlarmsRWAdapter) {
 
         activity.disposable.add(activity.viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
@@ -78,14 +78,11 @@ class AlarmsListFragment: Fragment() {
                     alarms.addAll(list.sortedWith(compareBy({ it.hours }, { it.minutes })))
                     rvAdapter.notifyDataSetChanged()
                 })
-
-        return alarms
     }
 }
 
 
 class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Adapter<AlarmsRWAdapter.ViewHolder> () {
-
 
     class ViewHolder(val layout: RelativeLayout) : RecyclerView.ViewHolder(layout) {
         val name: TextView = layout.findViewById(R.id.alarm_card_name_text_view)
@@ -124,6 +121,9 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
         if (alarm.name.isNotBlank()) {
             name.text = alarm.name
             name.visibility = TextView.VISIBLE
+        } else {
+            name.text = ""
+            name.visibility = TextView.GONE
         }
     }
 
@@ -133,7 +133,7 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
 
     private fun setupAlarmSwitch(switch: Switch, alarm: Alarm, position: Int) {
 
-        if (alarm.isOn) switch.isChecked = true
+        switch.isChecked = alarm.isOn
 
         switch.setOnCheckedChangeListener { buttonView, isChecked ->
             buttonView.isEnabled = false
