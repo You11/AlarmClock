@@ -121,4 +121,5 @@
     </plurals>
 
     <string name="alarm_list_single_alarm_days_description">Single alarm</string>
+    <string name="all_alarms_not_found_text">No alarms set. You can add one using button above!</string>
 </resources>

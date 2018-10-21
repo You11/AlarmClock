@@ -74,10 +74,22 @@ class AlarmsListFragment: Fragment() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { list ->
+                    if (list.isEmpty()) {
+                        showAlarmsNotFoundMessage()
+                        return@subscribe
+                    }
                     alarms.clear()
                     alarms.addAll(list.sortedWith(compareBy({ it.hours }, { it.minutes })))
                     rvAdapter.notifyDataSetChanged()
                 })
+    }
+
+    private fun showAlarmsNotFoundMessage() {
+        view?.findViewById<TextView>(R.id.all_alarms_not_found_text)?.apply {
+            visibility = TextView.VISIBLE
+            view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.visibility = RecyclerView.GONE
+        }
+        return
     }
 }
 

@@ -29,7 +29,7 @@
     <string name="alarm_setup_ringtone_dialog_title">Укажите рингтон будильника</string>
     <string name="activity_settings_title">Настройки</string>
     <string name="menu_settings_button">Настройки</string>
-    <string name="alarm_setup_turn_off_dialog_shake_device_mode">Потрясите устройство</string>
+    <string name="alarm_setup_turn_off_dialog_shake_device_mode">Встряхните устройство</string>
     <string name="pref_alarm_shake_times_number_title">Встряхиваний для выключения будильника</string>
     <string name="alarm_setup_days_sunday_text_view">ВС</string>
     <string name="alarm_setup_days_thursday_text_view">ЧТ</string>
@@ -104,4 +104,5 @@
     </plurals>
     <string name="alarm_setup_single_alarm">Одиночный будильник</string>
     <string name="alarm_list_single_alarm_days_description">Одиночный будильник</string>
+    <string name="all_alarms_not_found_text">Будильников не обнаружено. Их можно добавить с помощью кнопки выше!</string>
 </resources>

@@ -5,6 +5,19 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingTop="20dp"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
+        android:paddingRight="10dp"
+        android:paddingEnd="10dp"
+        android:visibility="gone"
+        android:text="@string/all_alarms_not_found_text"
+        android:id="@+id/all_alarms_not_found_text"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/all_alarms_recycler_view"
         android:layout_width="match_parent"
