@@ -10,7 +10,6 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -336,12 +335,12 @@ class AlarmSetupFragment: Fragment() {
     private fun createConfirmDeletionDialog(id: Long) {
         AlertDialog.Builder(activity).apply {
             setTitle(resources.getString(R.string.alarm_setup_delete_dialog_title))
-            setPositiveButton(resources.getString(R.string.confirm_button)) { dialog: DialogInterface, _: Int ->
+            setPositiveButton(resources.getString(R.string.confirm_deletion_button)) { dialog: DialogInterface, _: Int ->
                 deleteAlarm(id)
                 dialog.dismiss()
             }
 
-            setNegativeButton(resources.getString(R.string.cancel_button)) { dialog: DialogInterface, _: Int ->
+            setNegativeButton(resources.getString(R.string.cancel_deletion_button)) { dialog: DialogInterface, _: Int ->
                 dialog.cancel()
             }
             create()

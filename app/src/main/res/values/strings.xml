@@ -73,8 +73,8 @@
     <string name="alarm_setup_delete_button">Delete</string>
     <string name="alarm_setup_delete_dialog_title">Delete alarm?</string>
 
-    <string name="confirm_button">Confirm</string>
-    <string name="cancel_button">Cancel</string>
+    <string name="confirm_deletion_button">Delete</string>
+    <string name="cancel_deletion_button">Cancel</string>
     
     <string name="menu_add_alarm_button">Add</string>
     <string name="menu_settings_button">Settings</string>
