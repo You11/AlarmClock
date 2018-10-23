@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.*
 import android.widget.*
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -82,8 +83,6 @@ class AlarmsListFragment: Fragment() {
                     alarms.clear()
                     if (list.isEmpty()) {
                         showAlarmsNotFoundMessage()
-                        activity.disposable.clear()
-                        return@subscribe
                     } else {
                         alarms.addAll(list.sortedWith(compareBy({ it.hours }, { it.minutes })))
                         rvAdapter.notifyDataSetChanged()
@@ -96,7 +95,6 @@ class AlarmsListFragment: Fragment() {
             visibility = TextView.VISIBLE
             view?.findViewById<RecyclerView>(R.id.all_alarms_recycler_view)?.visibility = RecyclerView.GONE
         }
-        return
     }
 }
 
@@ -154,15 +152,15 @@ class AlarmsRWAdapter(private val allAlarms: ArrayList<Alarm>): RecyclerView.Ada
 
         switch.isChecked = alarm.isOn
 
-        switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            buttonView.isEnabled = false
-            val activity = buttonView.context as MainActivity
-            if (isChecked) {
+        switch.setOnClickListener { view ->
+            view.isEnabled = false
+            val activity = view.context as MainActivity
+            if (switch.isChecked) {
                 turnOnAlarm(activity, alarm, position)
             } else {
                 turnOffAlarm(activity, alarm, position)
             }
-            buttonView.isEnabled = true
+            view.isEnabled = true
         }
     }
 
