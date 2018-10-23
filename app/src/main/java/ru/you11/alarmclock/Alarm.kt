@@ -58,14 +58,7 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
 
         days.forEach {
             if (it.value) {
-                val alarmDate = Calendar.getInstance()
-                alarmDate.set(Calendar.HOUR_OF_DAY, hours)
-                alarmDate.set(Calendar.MINUTE, minutes)
-                alarmDate.set(Calendar.SECOND, 0)
-                alarmDate.set(Calendar.DAY_OF_WEEK, daysStringToCalendar[it.key]!!)
-                if (alarmDate.before(Calendar.getInstance())) {
-                    alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
-                }
+                val alarmDate = Utils.getAlarmDateFromAlarm(this, it.key)
 
                 if (alarmDate.before(earliestDate)) {
                     earliestDate = alarmDate
@@ -74,13 +67,7 @@ data class Alarm(@PrimaryKey(autoGenerate = true) var aid: Long = 0,
         }
 
         if (isSingleAlarm()) {
-            val alarmDate = Calendar.getInstance()
-            alarmDate.set(Calendar.HOUR_OF_DAY, hours)
-            alarmDate.set(Calendar.MINUTE, minutes)
-            alarmDate.set(Calendar.SECOND, 0)
-            if (alarmDate.before(Calendar.getInstance())) {
-                alarmDate.add(Calendar.DAY_OF_YEAR, 1)
-            }
+            val alarmDate = Utils.getAlarmDateFromAlarm(this)
 
             if (alarmDate.before(earliestDate)) {
                 earliestDate = alarmDate

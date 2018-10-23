@@ -12,7 +12,7 @@ import ru.you11.alarmclock.Alarm
 interface AlarmDao {
 
     @Query("SELECT * FROM alarmData")
-    fun getAll(): Maybe<List<Alarm>>
+    fun getAllAlarms(): Maybe<List<Alarm>>
 
     @Query("SELECT * FROM alarmData WHERE aid=:id")
     fun getAlarm(id: Long): Single<Alarm>
@@ -21,10 +21,10 @@ interface AlarmDao {
     fun updateAlarmStatus(id: Long, value: Boolean)
 
     @Insert(onConflict = REPLACE)
-    fun insert(alarm: Alarm): Long
+    fun insertAlarm(alarm: Alarm): Long
 
     @Query("DELETE from alarmData")
-    fun deleteAll()
+    fun deleteAllAlarms()
 
     @Query("DELETE from alarmData WHERE aid=:id")
     fun deleteAlarm(id: Long)

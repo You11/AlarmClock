@@ -28,16 +28,14 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import ru.you11.alarmclock.database.AlarmViewModel
 import ru.you11.alarmclock.database.Injection
-import ru.you11.alarmclock.database.ViewModuleFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
-    private lateinit var alarm: Alarm
+    private lateinit var currentAlarm: Alarm
     private val disposable = CompositeDisposable()
     private lateinit var viewModel: AlarmViewModel
-    private lateinit var viewModelFactory: ViewModuleFactory.ViewModelFactory
     private val mediaPlayer = MediaPlayer()
     private lateinit var vibrator: Vibrator
     private lateinit var sensorManager: SensorManager
@@ -53,14 +51,12 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        wakeUpDevice()
-        setupPreferences()
-
-        viewModelFactory = Injection.provideViewModelFactory(this)
-        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
-        updateAlarmNotification()
+        wakeUpDevice()
+        setupPreferences()
+        setupViewModel()
+        updateAlarmNotificationWithNextAlarm()
 
         val alarmId = getCurrentAlarmId()
 
@@ -68,25 +64,9 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { alarm ->
-                    this.alarm = alarm
-
-                    val turnOffMode = getTurnOffModeFromAlarm(alarm)
-
+                    this.currentAlarm = alarm
                     ringAlarm()
-
-                    when (turnOffMode) {
-                        alarm.TURN_OFF_MODE_BUTTON_PRESS -> {
-                            setupPressButtonDialog()
-                        }
-
-                        alarm.TURN_OFF_MODE_BUTTON_HOLD -> {
-                            setupHoldButtonDialog()
-                        }
-
-                        alarm.TURN_OFF_MODE_SHAKE_DEVICE -> {
-                            setupShakeDeviceDialog()
-                        }
-                    }
+                    setupCorrectTurnOffDialog(alarm)
                 })
     }
 
@@ -97,6 +77,28 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             mediaPlayer.release()
             vibrator.cancel()
             disposable.clear()
+        }
+    }
+
+    private fun setupViewModel() {
+        val viewModelFactory = Injection.provideViewModelFactory(this)
+        viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
+    }
+
+    private fun setupCorrectTurnOffDialog(alarm: Alarm) {
+        val turnOffMode = getTurnOffModeFromAlarm(alarm)
+        when (turnOffMode) {
+            alarm.TURN_OFF_MODE_BUTTON_PRESS -> {
+                setupPressButtonDialog()
+            }
+
+            alarm.TURN_OFF_MODE_BUTTON_HOLD -> {
+                setupHoldButtonDialog()
+            }
+
+            alarm.TURN_OFF_MODE_SHAKE_DEVICE -> {
+                setupShakeDeviceDialog()
+            }
         }
     }
 
@@ -130,8 +132,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun setupShakeDeviceDialog() {
         setContentView(R.layout.activity_activated_alarm_shake)
-        setupAccelerometer()
         setupLabelTextForDialog()
+        setupAccelerometer()
         setupDelayButton()
     }
 
@@ -158,14 +160,15 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun setupLabelTextForDialog() {
-        if (alarm.name.isNotBlank()) {
+        if (currentAlarm.name.isNotBlank()) {
             findViewById<TextView>(R.id.activated_alarm_name_label)?.apply {
-                text = alarm.name
+                text = currentAlarm.name
                 visibility = TextView.VISIBLE
             }
         }
+
         findViewById<TextView>(R.id.activated_alarm_time_label)?.apply {
-            text = Utils.getAlarmTimeDescription(alarm.hours, alarm.minutes)
+            text = Utils.getAlarmTimeDescription(currentAlarm.hours, currentAlarm.minutes)
         }
     }
 
@@ -178,7 +181,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun updateAlarmNotification() {
+    private fun updateAlarmNotificationWithNextAlarm() {
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -199,12 +202,12 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
 
         mediaPlayer.setVolume(volume, volume)
-        mediaPlayer.setDataSource(this, Uri.parse(alarm.ringtone))
+        mediaPlayer.setDataSource(this, Uri.parse(currentAlarm.ringtone))
         mediaPlayer.prepareAsync()
     }
 
     private fun ringAlarm() {
-        if (alarm.vibrate) {
+        if (currentAlarm.vibrate) {
             vibrate()
         }
 
@@ -240,8 +243,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     }
 
     private fun delayAlarm() {
-        addDelayTimeToAlarm(alarm, delayAlarmTime)
-        Utils.setSingleAlarm(alarm, this@ActivatedAlarmActivity)
+        addDelayTimeToAlarm(currentAlarm, delayAlarmTime)
+        Utils.setSingleAlarm(currentAlarm, this@ActivatedAlarmActivity)
         Toast.makeText(this@ActivatedAlarmActivity, resources.getQuantityString(R.plurals.activated_alarm_delay_toast, delayAlarmTime, delayAlarmTime), Toast.LENGTH_SHORT).show()
         finish()
     }
@@ -294,12 +297,12 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun turnOffAlarm() {
         Toast.makeText(this@ActivatedAlarmActivity, getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
-        if (alarm.isSingleAlarm()) {
-            disposable.add(viewModel.updateAlarmStatus(alarm.aid, false)
+        if (currentAlarm.isSingleAlarm()) {
+            disposable.add(viewModel.updateAlarmStatus(currentAlarm.aid, false)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
-                        //TODO: alarm recycler view does not update status immediately
+                        //TODO: recycler view in list fragment does not update status immediately
                         finish()
                     })
         } else {

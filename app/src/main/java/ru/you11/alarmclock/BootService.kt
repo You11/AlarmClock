@@ -13,7 +13,7 @@ class BootService: JobIntentService() {
 
     override fun onHandleWork(intent: Intent) {
 
-        AlarmDatabase.getInstance(this).alarmDao().getAll().observeOn(AndroidSchedulers.mainThread())
+        AlarmDatabase.getInstance(this).alarmDao().getAllAlarms().observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe { alarmList ->
                     alarmList.forEach {

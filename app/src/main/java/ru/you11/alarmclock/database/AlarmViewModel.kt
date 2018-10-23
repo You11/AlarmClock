@@ -9,7 +9,7 @@ import ru.you11.alarmclock.Alarm
 class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
 
     fun getAlarmList(): Maybe<List<Alarm>> {
-        return dataSource.getAll()
+        return dataSource.getAllAlarms()
     }
 
     fun getAlarm(id: Long): Single<Alarm> {
@@ -17,19 +17,18 @@ class AlarmViewModel(private val dataSource: AlarmDao) : ViewModel() {
     }
 
     fun updateAlarm(alarm: Alarm): Long {
-        return dataSource.insert(alarm)
+        return dataSource.insertAlarm(alarm)
     }
 
-    //TODO: should i keep this?
-    fun updateAlarmStatus(id: Long, value: Boolean): Completable {
+    fun updateAlarmStatus(id: Long, isOn: Boolean): Completable {
         return Completable.fromAction {
-            dataSource.updateAlarmStatus(id, value)
+            dataSource.updateAlarmStatus(id, isOn)
         }
     }
 
     fun deleteAllAlarms(): Completable {
         return Completable.fromAction {
-            dataSource.deleteAll()
+            dataSource.deleteAllAlarms()
         }
     }
 

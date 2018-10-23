@@ -36,21 +36,11 @@ object Utils {
     fun setAlarmWithDays(alarm: Alarm, context: Context) {
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
 
-        val currentDate = Calendar.getInstance()
         //sets several alarms
         alarm.days.forEach {
             if (it.value) {
                 val alarmIntent = setupAlarmIntent(alarm.aid * 10 + alarm.daysStringToCalendar[it.key]!!, context)
-                val alarmDate = Calendar.getInstance()
-                alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
-                alarmDate.set(Calendar.MINUTE, alarm.minutes)
-                alarmDate.set(Calendar.SECOND, 0)
-                alarmDate.set(Calendar.MILLISECOND, 0)
-                alarmDate.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
-                if (alarmDate.before(currentDate)) {
-                    alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
-                }
-
+                val alarmDate = getAlarmDateFromAlarm(alarm, it.key)
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmDate.timeInMillis, AlarmManager.INTERVAL_DAY * 7, alarmIntent)
 
                 displayAlarmLogs(alarmDate)
@@ -143,24 +133,16 @@ object Utils {
     }
 
     private fun getEarliestAlarm(allAlarms: List<Alarm>): Alarm? {
-        //todo: REFACTORING PLEASE HOLY SHIT
+        //TODO: still should refactor probably
+        var earliestAlarm: Alarm? = null
         var earliestDate = Calendar.getInstance()
         earliestDate.timeInMillis = Long.MAX_VALUE
-        var earliestAlarm: Alarm? = null
 
         for (alarm in allAlarms) {
             if (alarm.isOn) {
                 alarm.days.forEach {
                     if (it.value) {
-                        val alarmDate = Calendar.getInstance()
-                        alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
-                        alarmDate.set(Calendar.MINUTE, alarm.minutes)
-                        alarmDate.set(Calendar.SECOND, 0)
-                        alarmDate.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[it.key]!!)
-                        if (alarmDate.before(Calendar.getInstance())) {
-                            alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
-                        }
-
+                        val alarmDate = getAlarmDateFromAlarm(alarm, it.key)
                         if (alarmDate.before(earliestDate)) {
                             earliestDate = alarmDate
                             earliestAlarm = alarm
@@ -169,14 +151,7 @@ object Utils {
                 }
 
                 if (alarm.isSingleAlarm()) {
-                    val alarmDate = Calendar.getInstance()
-                    alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
-                    alarmDate.set(Calendar.MINUTE, alarm.minutes)
-                    alarmDate.set(Calendar.SECOND, 0)
-                    if (alarmDate.before(Calendar.getInstance())) {
-                        alarmDate.add(Calendar.DAY_OF_YEAR, 1)
-                    }
-
+                    val alarmDate = getAlarmDateFromAlarm(alarm)
                     if (alarmDate.before(earliestDate)) {
                         earliestDate = alarmDate
                         earliestAlarm = alarm
@@ -188,6 +163,33 @@ object Utils {
         setDaysInEarliestAlarm(earliestAlarm, earliestDate[Calendar.DAY_OF_WEEK])
 
         return earliestAlarm
+    }
+
+    fun getAlarmDateFromAlarm(alarm: Alarm): Calendar {
+        val alarmDate = Calendar.getInstance()
+        alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
+        alarmDate.set(Calendar.MINUTE, alarm.minutes)
+        alarmDate.set(Calendar.SECOND, 0)
+        alarmDate.set(Calendar.MILLISECOND, 0)
+        if (alarmDate.before(Calendar.getInstance())) {
+            alarmDate.add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        return alarmDate
+    }
+
+    fun getAlarmDateFromAlarm(alarm: Alarm, dayOfWeek: String): Calendar {
+        val alarmDate = Calendar.getInstance()
+        alarmDate.set(Calendar.HOUR_OF_DAY, alarm.hours)
+        alarmDate.set(Calendar.MINUTE, alarm.minutes)
+        alarmDate.set(Calendar.SECOND, 0)
+        alarmDate.set(Calendar.MILLISECOND, 0)
+        alarmDate.set(Calendar.DAY_OF_WEEK, alarm.daysStringToCalendar[dayOfWeek]!!)
+        if (alarmDate.before(Calendar.getInstance())) {
+            alarmDate.add(Calendar.WEEK_OF_MONTH, 1)
+        }
+
+        return alarmDate
     }
 
     private fun setDaysInEarliestAlarm(earliestAlarm: Alarm?, alarmDay: Int) {
