@@ -39,6 +39,11 @@ class AlarmSetupFragment: Fragment() {
         setupUIAndAlarm()
     }
 
+    override fun onStop() {
+        super.onStop()
+        activity.disposable.clear()
+    }
+
     private fun setupUIAndAlarm() {
         if (arguments != null && arguments?.getParcelable<Alarm>("alarm") != null) {
             alarm = arguments?.getParcelable("alarm")!!
@@ -58,6 +63,9 @@ class AlarmSetupFragment: Fragment() {
             text = alarm.name
         }
 
+        if (!alarm.isSingleAlarm()) {
+            enableMultipleDaysUI(getDayButtonsArray())
+        }
         setupVibrateCheckbox()
         setupDeleteButton()
     }
@@ -216,15 +224,30 @@ class AlarmSetupFragment: Fragment() {
                 val dayButtons = getDayButtonsArray()
 
                 if (isChecked) {
-                    disableDayButtons(dayButtons)
-                    saveButton?.isEnabled = true
+                    disableMultipleButtonsUI(dayButtons, saveButton)
                 } else {
-                    colorActiveDaysViews(getDaysToViewHashmap())
-                    enableDayButtons(dayButtons)
-                    saveButton?.isEnabled = isDaysSelected()
+                    enableMultipleDaysUI(dayButtons)
                 }
             }
         }
+    }
+
+    private fun disableMultipleButtonsUI(dayButtons: ArrayList<TextView>, saveButton: Button?) {
+        disableDayButtons(dayButtons)
+        saveButton?.isEnabled = true
+    }
+
+    private fun enableMultipleDaysUI(dayButtons: ArrayList<TextView>) {
+        val checkboxButton = view?.findViewById(R.id.alarm_setup_single_alarm_checkbox) as CheckBox
+        if (checkboxButton.isChecked) {
+            checkboxButton.isChecked = false
+            checkboxButton.jumpDrawablesToCurrentState()
+        }
+
+        colorActiveDaysViews(getDaysToViewHashmap())
+        enableDayButtons(dayButtons)
+        val saveButton = view?.findViewById<Button>(R.id.alarm_setup_save_button)
+        saveButton?.isEnabled = isDaysSelected()
     }
 
     private fun getDayButtonsArray(): ArrayList<TextView> {
@@ -372,6 +395,7 @@ class AlarmSetupFragment: Fragment() {
         disableUI(alarmNameView, alarmTimeView, isAlarmVibratingView)
 
         if (view?.findViewById<CheckBox>(R.id.alarm_setup_single_alarm_checkbox)?.isChecked!!) {
+
             for (day in alarm.days) {
                 day.setValue(false)
             }
@@ -415,7 +439,6 @@ class AlarmSetupFragment: Fragment() {
                                 }
                                 Utils.updateAlarmNotification(allAlarms, activity)
                                 makeToastWithRemainingTime(alarm)
-
                                 fragmentManager?.popBackStack()
                             }
                 })

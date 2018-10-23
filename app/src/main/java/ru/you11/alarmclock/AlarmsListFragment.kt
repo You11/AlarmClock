@@ -25,6 +25,11 @@ class AlarmsListFragment: Fragment() {
         setHasOptionsMenu(true)
     }
 
+    override fun onStop() {
+        super.onStop()
+        activity.disposable.clear()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity = this.getActivity() as MainActivity
 
@@ -74,13 +79,15 @@ class AlarmsListFragment: Fragment() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { list ->
+                    alarms.clear()
                     if (list.isEmpty()) {
                         showAlarmsNotFoundMessage()
+                        activity.disposable.clear()
                         return@subscribe
+                    } else {
+                        alarms.addAll(list.sortedWith(compareBy({ it.hours }, { it.minutes })))
+                        rvAdapter.notifyDataSetChanged()
                     }
-                    alarms.clear()
-                    alarms.addAll(list.sortedWith(compareBy({ it.hours }, { it.minutes })))
-                    rvAdapter.notifyDataSetChanged()
                 })
     }
 

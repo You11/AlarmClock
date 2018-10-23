@@ -14,23 +14,12 @@ object Utils {
     private const val ALARM_NOTIFICATION_ID = 100
     private const val NOTIFICATION_REQUEST_CODE = 101
 
-    //triggers when user presses delay button
+    //also gets called when user presses delay button
     fun setSingleAlarm(alarm: Alarm, context: Context) {
-
-        val alarmIntent = setupAlarmIntent(alarm.aid * 10, context)
-
         val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as AlarmManager
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-
-        calendar.set(Calendar.HOUR_OF_DAY, alarm.hours)
-        calendar.set(Calendar.MINUTE, alarm.minutes)
-        calendar.set(Calendar.SECOND, 0)
-        if (calendar.before(Calendar.getInstance())) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent)
+        val alarmIntent = setupAlarmIntent(alarm.aid * 10, context)
+        val alarmDate = getAlarmDateFromAlarm(alarm)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmDate.timeInMillis, alarmIntent)
     }
 
     fun setAlarmWithDays(alarm: Alarm, context: Context) {
@@ -207,6 +196,7 @@ object Utils {
     private fun setupAlarmIntent(id: Long, context: Context): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("alarmId", id)
+        intent.action = "ru.you11.alarmclock"
         return PendingIntent.getBroadcast(context, id.toInt(), intent, 0)
     }
 
