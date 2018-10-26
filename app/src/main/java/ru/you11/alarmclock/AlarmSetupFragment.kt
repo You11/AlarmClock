@@ -68,6 +68,7 @@ class AlarmSetupFragment: Fragment() {
         }
         setupVibrateCheckbox()
         setupDeleteButton()
+        setSummaryForRingtone(Uri.parse(alarm.ringtone))
     }
 
     private fun setupTimePicker() {
