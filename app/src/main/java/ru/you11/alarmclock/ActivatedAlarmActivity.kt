@@ -57,7 +57,6 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         wakeUpDevice()
         setupPreferences()
         setupViewModel()
-        updateAlarmNotificationWithNextAlarm()
 
         val alarmId = getCurrentAlarmId()
 
@@ -68,6 +67,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
                     this.currentAlarm = alarm
                     ringAlarm()
                     setupCorrectTurnOffDialog(alarm)
+                    updateAlarmStatusAndNotification()
                 })
     }
 
@@ -197,7 +197,20 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun updateAlarmNotificationWithNextAlarm() {
+    private fun updateAlarmStatusAndNotification() {
+        if (currentAlarm.isSingleAlarm()) {
+            disposable.add(viewModel.updateAlarmStatus(currentAlarm.aid, false)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        updateAlarmNotification()
+                    })
+        } else {
+            updateAlarmNotification()
+        }
+    }
+
+    private fun updateAlarmNotification() {
         disposable.add(viewModel.getAlarmList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -314,17 +327,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
 
     private fun turnOffAlarm() {
         Toast.makeText(this@ActivatedAlarmActivity, getString(R.string.activated_alarm_turn_off_toast), Toast.LENGTH_SHORT).show()
-        if (currentAlarm.isSingleAlarm()) {
-            disposable.add(viewModel.updateAlarmStatus(currentAlarm.aid, false)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        //TODO: recycler view in list fragment does not update status immediately
-                        finish()
-                    })
-        } else {
-            finish()
-        }
+        finish()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

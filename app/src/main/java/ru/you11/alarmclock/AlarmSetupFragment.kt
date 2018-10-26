@@ -336,6 +336,9 @@ class AlarmSetupFragment: Fragment() {
     private fun setupVibrateCheckbox() {
         view?.findViewById<CheckBox>(R.id.alarm_setup_vibrate_checkbox)?.apply {
             this.isChecked = alarm.vibrate
+            if (this.isChecked) {
+                this.jumpDrawablesToCurrentState()
+            }
         }
     }
 
