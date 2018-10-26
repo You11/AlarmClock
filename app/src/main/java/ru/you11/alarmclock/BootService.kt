@@ -18,7 +18,11 @@ class BootService: JobIntentService() {
                 .subscribe { alarmList ->
                     alarmList.forEach {
                         if (it.isOn) {
-                            Utils.setAlarmWithDays(it, this)
+                            if (it.isSingleAlarm()) {
+                                Utils.setSingleAlarm(it, this)
+                            } else {
+                                Utils.setAlarmWithDays(it, this)
+                            }
                         }
 
                         Utils.updateAlarmNotification(alarmList, this)
