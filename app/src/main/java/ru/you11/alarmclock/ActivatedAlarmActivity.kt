@@ -40,6 +40,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private lateinit var vibrator: Vibrator
     private lateinit var sensorManager: SensorManager
     private var lastShakeTime: Long = System.currentTimeMillis()
+    private var mediaPlayerPosition = 0
 
     //Prefs
     private var secondsToHoldButton: Int = 0
@@ -78,6 +79,21 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             vibrator.cancel()
             disposable.clear()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putInt("shakeTimes", amountOfShakeTimes)
+        outState?.putInt("mediaPlayerPosition", mediaPlayer.currentPosition)
+        mediaPlayer.pause()
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            amountOfShakeTimes = savedInstanceState.getInt("shakeTimes")
+            mediaPlayerPosition = savedInstanceState.getInt("mediaPlayerPosition")
+        }
+        super.onRestoreInstanceState(savedInstanceState)
     }
 
     private fun setupViewModel() {
@@ -214,6 +230,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         if (shouldPlaySound())
             setupMediaPlayer()
             mediaPlayer.setOnPreparedListener {
+                mediaPlayer.seekTo(mediaPlayerPosition)
                 mediaPlayer.start()
             }
     }

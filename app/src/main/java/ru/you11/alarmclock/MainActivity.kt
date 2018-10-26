@@ -4,6 +4,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.widget.FrameLayout
 import io.reactivex.disposables.CompositeDisposable
 import ru.you11.alarmclock.database.AlarmViewModel
 import ru.you11.alarmclock.database.Injection
@@ -25,9 +26,16 @@ class MainActivity : AppCompatActivity() {
         viewModelFactory = Injection.provideViewModelFactory(this)
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(AlarmViewModel::class.java)
 
-        supportFragmentManager.beginTransaction()
-                .add(R.id.empty_fragment_container, AlarmsListFragment())
-                .commit()
+        if (findViewById<FrameLayout>(R.id.empty_fragment_container) != null) {
+            if (savedInstanceState != null) {
+                return
+            }
+
+
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.empty_fragment_container, AlarmsListFragment())
+                    .commit()
+        }
     }
 
     override fun onStop() {
