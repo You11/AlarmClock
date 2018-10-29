@@ -10,10 +10,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.*
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -74,6 +71,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     override fun onStop() {
         super.onStop()
         if (this.isFinishing) {
+            Log.d("mediaPlayerPause", "onStop")
             mediaPlayer.stop()
             mediaPlayer.release()
             vibrator.cancel()
@@ -84,7 +82,10 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     override fun onSaveInstanceState(outState: Bundle?) {
         outState?.putInt("shakeTimes", amountOfShakeTimes)
         outState?.putInt("mediaPlayerPosition", mediaPlayer.currentPosition)
-        mediaPlayer.pause()
+        Log.d("mediaPlayerPause", "saveInstanceState")
+        if (isChangingConfigurations) {
+            mediaPlayer.pause()
+        }
         super.onSaveInstanceState(outState)
     }
 
@@ -156,8 +157,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
     private fun wakeUpDevice() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     private fun setupPreferences() {
@@ -230,6 +231,8 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
             mediaPlayer.setAudioAttributes(attributes)
         }
 
+        Log.d("mediaPlayerPause", "setup")
+        mediaPlayer.isLooping = true
         mediaPlayer.setVolume(volume, volume)
         mediaPlayer.setDataSource(this, Uri.parse(currentAlarm.ringtone))
         mediaPlayer.prepareAsync()
@@ -243,6 +246,7 @@ class ActivatedAlarmActivity: AppCompatActivity(), SensorEventListener {
         if (shouldPlaySound())
             setupMediaPlayer()
             mediaPlayer.setOnPreparedListener {
+                Log.d("mediaPlayerPause", "onPrepared")
                 mediaPlayer.seekTo(mediaPlayerPosition)
                 mediaPlayer.start()
             }
