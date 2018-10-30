@@ -56,8 +56,8 @@
     <string name="alarm_setup_vibrate_text_view">Vibrate</string>
     <string name="alarm_setup_turn_off_mode_text_view">Turn off mode</string>
     <string name="alarm_setup_turn_off_dialog_title">Pick alarm cancel mode</string>
-    <string name="alarm_setup_turn_off_dialog_button_press_mode">Button press</string>
-    <string name="alarm_setup_turn_off_dialog_button_hold_mode">Button hold</string>
+    <string name="alarm_setup_turn_off_dialog_button_press_mode">Press button</string>
+    <string name="alarm_setup_turn_off_dialog_button_hold_mode">Hold button</string>
     <string name="alarm_setup_turn_off_dialog_shake_device_mode">Shake device</string>
     <string name="alarm_setup_ringtone_dialog_title">Set ringtone for alarm</string>
     <string name="alarm_setup_ringtone_text_view">Ringtone</string>
